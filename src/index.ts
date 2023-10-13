@@ -209,7 +209,7 @@ export function createTranslation
 
     }
 
-    function useTranslation<Page extends Pages, Key extends Keys<Page>>(page?: Page, fixedLocale?: QueryLanguage, fixedVariables?: Record<string, string | number>) {
+    function useTranslation<Page extends Pages, Key extends Keys<Page>>(page?: Page, fixedLocale?: AllowedTranslations, fixedVariables?: Record<string, string | number>) {
 
         setLocale(fixedLocale || query);
         const Variables = fixedVariables || {}
@@ -279,11 +279,18 @@ export function createTranslation
 
     }
 
+    function translation (fixedLocale?: AllowedTranslations) {
+        setLocale(fixedLocale || query);
+        return {
+            useTranslation: (page?: Pages, fixedVariables?: Record<string, string | number>) => useTranslation(page, fixedLocale || query, fixedVariables)
+        }
+    }
+
     const pages = Object.keys(locale) as Pages[]
     const page = pages[0] as Pages
 
     const allowedLocale = Object.keys(locales)[0] as AllowedTranslations
 
-    return { translate, time, useTranslation, pages, page, allowedLocale, genericPage, translation: useTranslation }
+    return { translate, time, useTranslation, pages, page, allowedLocale, genericPage, translation }
 
 }
