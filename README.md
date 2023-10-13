@@ -60,8 +60,8 @@ We can define these variables in these way:
 {
     "homepage": {
         "welcome": {
-            base: "Welcome {user}!",
-            values: {
+            "base": "Welcome {user}!",
+            "values": {
                 "user": "user"
             }
         }
@@ -75,17 +75,17 @@ Anyway you can run the replace functions without declaring its values, but it wo
 
 Remember all your JSON Files should have the same structure, pages, and keys elements. In case there is some difference between the files, typescript should detect it and warn you.
 
+
 ```JSON
-// en.json
 {
     "homepage": {
-        "welcome": "Welcome {value}"
+        "welcome": "Welcome, {value}"
     }
 }
-// es.json
+
 {
     "homepage": {
-        "welcome": "Welcome {value}"
+        "welcome": "Bienvenido, {value}"
     }
 }
 ```
@@ -118,7 +118,7 @@ console.log(t.ready) // "Enjoy your t object :)"
 
 ```
 
-## Use translation on NextJs ⚫
+## Use translation on NextJs 🔮
 
 ### next/pages
 
@@ -169,7 +169,7 @@ export default HomePage() {
 
 ```
 
-## Features
+## Features 🗽
 
 - 100% type safe. You get type completion everywhere. Even the output strings have their properties with more details and type safe.
 - You can use translations as object translation or function method object tree.
@@ -193,6 +193,6 @@ const { t, g, time } = useTranslation("global")
 const formattedTime = time('10/10/23'/*number|string|Date*/,'md'/*xs,sm,md,lg,xl*/, undefined/*prefferedLocale*/) // Also all translation function objects have a parameter for fixing a preffered locale translation
 ```
 
-## @nivandres
+## @nivandres 👤
 
 Hi, this is my first library for javascript, so It's not the best (yet), but at least it is so useful for me. I remade the way I do translations for my Nextjs projects but in a simple lib. So it is the best way to make translations for me. I really like to make translations in function objects tree, so it is very versatile for working on diferrent kind of projects
