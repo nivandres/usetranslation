@@ -1,5 +1,5 @@
 {
-  "name": "@nivandres/use-translation",
+  "name": "nivandres-use-translation",
   "version": "1.0.0",
   "description": "Use Translation Hook",
   "main": "dist/index.js",
