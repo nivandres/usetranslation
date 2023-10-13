@@ -28,6 +28,10 @@ export function createTranslation(settings) {
     const genericPage = Object.keys(locale)[0];
     let getLocale = () => query;
     let setLocale = (locale) => query = locale;
+    if (settings.state) {
+        getLocale = settings.state.getState;
+        setLocale = (locale) => { query = locale; return settings.state?.setState(locale); };
+    }
     function translate(page, key, variables, prefferedLocale) {
         const l = prefferedLocale || getLocale();
         let translation = locales[l]?.[page]?.[key];
@@ -43,7 +47,7 @@ export function createTranslation(settings) {
         if (settings.onTranslation) {
             base = settings.onTranslation(base, { queryLanguage: l, queryPage: page, queryKey: String(key), original, placeholderVariables: placeholder });
         }
-        return (settings.disableOutputDetails ? base : Object.assign(new Object(base), { from: local, to: l, query: l, page, key, original, variables: placeholder }));
+        return (settings.disableOutputDetails ? base : Object.assign(new Object(base), { from: local, to: l, query: l, page, key, original: typeof original == 'string' ? { base: original, values: {} } : original, variables: placeholder }));
     }
     function time(time, format, prefferedLocale) {
         if (!time)
@@ -97,8 +101,9 @@ export function createTranslation(settings) {
                 };
                 break;
         }
+        // Narrow Space Problem ' ' with SSR.
         try {
-            return new Intl.DateTimeFormat(prefferedLocale || getLocale(), option).format(date);
+            return new Intl.DateTimeFormat(prefferedLocale || getLocale(), option).format(date).replaceAll(' ', ' ');
         }
         catch (e) {
             return (settings.onFail || (() => '⚠️'))(e);
@@ -107,6 +112,7 @@ export function createTranslation(settings) {
     function useTranslation(page, fixedLocale, fixedVariables) {
         setLocale(fixedLocale || query);
         const Variables = fixedVariables || {};
+        const P = page || genericPage;
         let translations = new Object(translate);
         Object.keys(locale).forEach((p) => {
             const page = p;
@@ -122,17 +128,21 @@ export function createTranslation(settings) {
                 });
             });
         });
-        const t = {
-            ...translations[page || genericPage],
-            g: translations,
-            time: time,
-            intl: Intl,
+        const g = { ...translations };
+        const t = Object.assign(translations[P], {
+            g, time, intl: Intl
+        });
+        return { t, tr: translate, g: t.g, pages: t.g, time, i: Intl };
+    }
+    function translation(fixedLocale) {
+        setLocale(fixedLocale || query);
+        return {
+            useTranslation: (page, fixedVariables) => useTranslation(page, fixedLocale || query, fixedVariables)
         };
-        return { t, tr: translate, g: t.g, pages: t.g };
     }
     const pages = Object.keys(locale);
     const page = pages[0];
     const allowedLocale = Object.keys(locales)[0];
-    return { translate, time, useTranslation, pages, page, allowedLocale, genericPage, translation: useTranslation };
+    return { translate, time, useTranslation, pages, page, allowedLocale, genericPage, translation };
 }
 //# sourceMappingURL=index.js.map
