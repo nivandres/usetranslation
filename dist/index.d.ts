@@ -156,6 +156,7 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
             } & string; } : never); } & Function;
             time: (time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) => any;
             intl: typeof Intl;
+            locale: AllowedTranslations;
         };
         tr: <P extends Pages, K extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P]>(page: P, key: K, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
             readonly from: MainTranslation;
@@ -267,6 +268,7 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
         } & string; } : never); } & Function;
         time: (time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) => any;
         i: typeof Intl;
+        locale: AllowedTranslations;
     };
     pages: Pages[];
     page: Pages;
@@ -376,6 +378,7 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
                 } & string; } : never); } & Function;
                 time: (time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) => any;
                 intl: typeof Intl;
+                locale: AllowedTranslations;
             };
             tr: <P extends Pages, K extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P]>(page: P, key: K, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
@@ -487,7 +490,9 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
             } & string; } : never); } & Function;
             time: (time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) => any;
             i: typeof Intl;
+            locale: AllowedTranslations;
         };
     };
+    fromHeaders: (header: Headers) => AllowedTranslations;
 };
 export {};
