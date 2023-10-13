@@ -1,5 +1,5 @@
 {
-  "name": "use-translation",
+  "name": "@nivandres/use-translation",
   "version": "1.0.0",
   "description": "Use Translation Hook",
   "main": "dist/index.js",
@@ -11,8 +11,18 @@
     "translation"
   ],
   "author": "nivandres",
+  "github": "https://github.com/nivandres/usetranslation",
   "license": "ISC",
   "devDependencies": {
     "typescript": "^5.2.2"
-  }
+  },
+  "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nivandres/usetranslation.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nivandres/usetranslation/issues"
+  },
+  "homepage": "https://github.com/nivandres/usetranslation#readme"
 }
