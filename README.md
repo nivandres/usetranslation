@@ -130,7 +130,7 @@ import * as es from "@/public/locales/es.json"
 
 import { createTranslation } from "use-translation"
 
-const { translation, page, allowedLocale } = createTranslation({
+const { translation, page, locale } = createTranslation({
     locales: { en, es },
     defaultLocale: en // you can define it with the full object.
     onNotTranslation: (queryValue, queryPage, queryKey, queryLanguage) => {
@@ -141,7 +141,7 @@ const { translation, page, allowedLocale } = createTranslation({
 
 import { useRouter } from "next/router";
 
-export function useTranslation (page?: typeof page, fixedLanguage?: typeof allowedLocale) {
+export function useTranslation (page?: typeof page, fixedLanguage?: typeof locale) {
     const router = useRouter();
     const { useTranslation: t } = translation(router.locale)
     return t;

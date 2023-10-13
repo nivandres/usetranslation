@@ -270,7 +270,10 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
     };
     pages: Pages[];
     page: Pages;
-    allowedLocale: AllowedTranslations;
+    main: MainTranslation;
+    locales: AllowedTranslations[];
+    locale: AllowedTranslations;
+    translations: { [locale in AllowedTranslations]: Translation; };
     genericPage: Pages;
     translation: (fixedLocale?: AllowedTranslations) => {
         useTranslation: (page?: Pages, fixedVariables?: Record<string, string | number>) => {

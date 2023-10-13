@@ -289,8 +289,9 @@ export function createTranslation
     const pages = Object.keys(locale) as Pages[]
     const page = pages[0] as Pages
 
-    const allowedLocale = Object.keys(locales)[0] as AllowedTranslations
+    const localeList = Object.keys(locales) as AllowedTranslations[]
+    const allowedLocale = localeList[0] as AllowedTranslations
 
-    return { translate, time, useTranslation, pages, page, allowedLocale, genericPage, translation }
+    return { translate, time, useTranslation, pages, page, main: local, locales: localeList , locale: allowedLocale, translations: locales, genericPage, translation }
 
 }

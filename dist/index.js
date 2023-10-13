@@ -142,7 +142,8 @@ export function createTranslation(settings) {
     }
     const pages = Object.keys(locale);
     const page = pages[0];
-    const allowedLocale = Object.keys(locales)[0];
-    return { translate, time, useTranslation, pages, page, allowedLocale, genericPage, translation };
+    const localeList = Object.keys(locales);
+    const allowedLocale = localeList[0];
+    return { translate, time, useTranslation, pages, page, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation };
 }
 //# sourceMappingURL=index.js.map
