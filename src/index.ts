@@ -31,7 +31,7 @@ export function createTranslation
         Translation extends JSONTranslation,
         Pages extends keyof Translation,
         DefinedPages extends string
-        
+
     >
     (
         settings: {
@@ -128,7 +128,7 @@ export function createTranslation
         readonly query: QueryLanguage,
         readonly page: QueryPage,
         readonly key: QueryKey,
-        readonly original: { base:string, values:Record<keyof placeholder<QueryPage, QueryKey>,string> }
+        readonly original: { base: string, values: Record<keyof placeholder<QueryPage, QueryKey>, string> }
         readonly variables: placeholder<QueryPage, QueryKey>
     }
 
@@ -147,7 +147,7 @@ export function createTranslation
         if (settings.onTranslation) {
             base = settings.onTranslation(base, { queryLanguage: l, queryPage: page, queryKey: String(key), original, placeholderVariables: placeholder })
         }
-        return (settings.disableOutputDetails ? base : Object.assign(new Object(base), { from: local, to: l, query: l, page, key, original: typeof original == 'string' ? {base:original,values:{}} : original, variables: placeholder })) as translatedString<P, K>
+        return (settings.disableOutputDetails ? base : Object.assign(new Object(base), { from: local, to: l, query: l, page, key, original: typeof original == 'string' ? { base: original, values: {} } : original, variables: placeholder })) as translatedString<P, K>
     }
 
     function time(time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) {
@@ -233,7 +233,8 @@ export function createTranslation
         type Translation = TranslationGlobal[Page] & {
             g: TranslationGlobal & Function,
             time: typeof time,
-            intl: typeof Intl
+            intl: typeof Intl,
+            locale: AllowedTranslations
         }
 
         let translations: any = new Object(translate)
@@ -269,21 +270,42 @@ export function createTranslation
             })
 
         })
-        const g: TranslationGlobal =  {...translations}
+        const g: TranslationGlobal = { ...translations }
 
         const t: Translation = Object.assign(translations[P], {
             g, time, intl: Intl
         })
 
-        return { t, tr: translate, g: t.g, pages: t.g, time, i: Intl }
+        return { t, tr: translate, g: t.g, pages: t.g, time, i: Intl, locale: getLocale() }
 
     }
 
-    function translation (fixedLocale?: AllowedTranslations) {
+    function translation(fixedLocale?: AllowedTranslations) {
         setLocale(fixedLocale || query);
         return {
             useTranslation: (page?: Pages, fixedVariables?: Record<string, string | number>) => useTranslation(page, fixedLocale || query, fixedVariables)
         }
+    }
+
+    function fromHeaders(header: Headers) {
+        let list = {
+        } as Record<string, number>
+        const keys = Object.keys(locales).map(l => { list[l] = 0; return l }) as any[]
+
+        header.get('accept-language')?.toLowerCase().split(';').map(a => a.includes(',') ? keys.map(k => a.includes(k.toLowerCase()) ? list[k]++ : '') : a.split(',').map(b => keys.map(k => b.includes(k.toLowerCase()) ? list[k] = list[k] + 0.5 : '')))
+
+        header.get('referer')?.split('/')[3].toLowerCase().split('0').map(a => keys.map(k => a.includes(k.toLowerCase()) ? list[k]++ : ''))
+
+        header.get('cookie')?.split(';').filter(c => c.match(/(locale|LOCALE|lang)/gi)).map(a => a.split('=')[1].toLowerCase().split('0').map(b => keys.map(k => b.includes(k.toLowerCase()) ? list[k]++ : '')))
+
+        // get the most used locale
+        Object.keys(list).map((k, i) => keys[i] = { locale: k, count: list[k] })
+
+        return keys.sort((a, b) => b.count - a.count)[0]?.locale as AllowedTranslations
+    }
+
+    function translationFromHeaders(header: Headers) {
+        return translation(fromHeaders(header))
     }
 
     const pages = Object.keys(locale) as Pages[]
@@ -292,6 +314,6 @@ export function createTranslation
     const localeList = Object.keys(locales) as AllowedTranslations[]
     const allowedLocale = localeList[0] as AllowedTranslations
 
-    return { translate, time, useTranslation, pages, page, main: local, locales: localeList , locale: allowedLocale, translations: locales, genericPage, translation }
+    return { translate, time, useTranslation, pages, page, defaultLocale: local, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation, fromHeaders }
 
 }

@@ -270,6 +270,7 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
     };
     pages: Pages[];
     page: Pages;
+    defaultLocale: MainTranslation;
     main: MainTranslation;
     locales: AllowedTranslations[];
     locale: AllowedTranslations;

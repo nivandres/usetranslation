@@ -150,7 +150,7 @@ export function useTranslation (page?: typeof page, fixedLanguage?: typeof local
 
 That's all needed to start working with { t }. Also you can handle it however you want.
 
-### Component usage example
+#### Component usage example
 
 ```javascript
 import { useTranslation } from "@/libs/lang"
@@ -167,6 +167,26 @@ export default HomePage() {
 
 }
 
+```
+
+### next/app
+
+#### Config File
+
+```javascript
+import * as en from "@/public/locales/en.json"
+import * as es from "@/public/locales/es.json"
+
+import { createTranslation } from "nivandres-use-translation"
+
+const { translationFromHeaders } = createTranslation({
+    locales: { en, es },
+    defaultLocale: 'en'
+})
+
+import { headers } from "next/headers"
+
+export const { useTranslation } = translationFromHeaders(headers());
 ```
 
 ## Features 🗽

@@ -144,6 +144,6 @@ export function createTranslation(settings) {
     const page = pages[0];
     const localeList = Object.keys(locales);
     const allowedLocale = localeList[0];
-    return { translate, time, useTranslation, pages, page, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation };
+    return { translate, time, useTranslation, pages, page, defaultLocale: local, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation };
 }
 //# sourceMappingURL=index.js.map
