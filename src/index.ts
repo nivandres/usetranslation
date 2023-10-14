@@ -50,7 +50,7 @@ export function createTranslation
 
             disableOutputDetails?: boolean
 
-            onFail?: (e: unknown) => any
+            onFail?: (e: unknown) => string
             onNotTranslation?: (originalQuery: TranslationValue<any>, queryPage: Pages, queryKey: string, queryLanguage: AllowedTranslations, placeholderVariables?: Record<string, string | number>) => string
             onTranslation?: (translatedString: string, details: { queryLanguage: AllowedTranslations, queryPage: Pages, queryKey: string, original: TranslationValue<any>, placeholderVariables?: Record<string, number | string> }) => string
 
@@ -209,6 +209,8 @@ export function createTranslation
 
     }
 
+    const useTime = Object.assign(time, { now: Object.assign(() => time(Date.now(), 'md'), { use: (format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: AllowedTranslations) => time(Date.now(), format, prefferedLocale) }) })
+
     function useTranslation<Page extends Pages, Key extends Keys<Page>>(page?: Page, fixedLocale?: AllowedTranslations, fixedVariables?: Record<string, string | number>) {
 
         setLocale(fixedLocale || query);
@@ -232,7 +234,7 @@ export function createTranslation
 
         type Translation = TranslationGlobal[Page] & {
             g: TranslationGlobal & Function,
-            time: typeof time,
+            time: typeof useTime,
             intl: typeof Intl,
             locale: AllowedTranslations
         }
@@ -270,13 +272,13 @@ export function createTranslation
             })
 
         })
-        const g: TranslationGlobal = { ...translations }
+        const g: TranslationGlobal = translations
 
         const t: Translation = Object.assign(translations[P], {
-            g, time, intl: Intl
+            g, time: useTime, intl: Intl
         })
 
-        return { t, tr: translate, g: t.g, pages: t.g, time, i: Intl, locale: getLocale() }
+        return { t, tr: translate, g, pages: g, time: useTime, useTime, i: Intl, locale: getLocale() }
 
     }
 
@@ -294,7 +296,7 @@ export function createTranslation
 
         header.get('accept-language')?.toLowerCase().split(';').map(a => a.includes(',') ? keys.map(k => a.includes(k.toLowerCase()) ? list[k]++ : '') : a.split(',').map(b => keys.map(k => b.includes(k.toLowerCase()) ? list[k] = list[k] + 0.5 : '')))
 
-        header.get('referer')?.split('/')[3].toLowerCase().split('0').map(a => keys.map(k => a.includes(k.toLowerCase()) ? list[k]++ : ''))
+        header.get('referer')?.split('/')[3].toLowerCase().split('0').map(a => keys.map(k => a.includes(k.toLowerCase()) ? list[k] = list[k] + 2 : ''))
 
         header.get('cookie')?.split(';').filter(c => c.match(/(locale|LOCALE|lang)/gi)).map(a => a.split('=')[1].toLowerCase().split('0').map(b => keys.map(k => b.includes(k.toLowerCase()) ? list[k]++ : '')))
 
@@ -314,6 +316,6 @@ export function createTranslation
     const localeList = Object.keys(locales) as AllowedTranslations[]
     const allowedLocale = localeList[0] as AllowedTranslations
 
-    return { translate, time, useTranslation, pages, page, defaultLocale: local, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation, getLocaleFromHeaders: fromHeaders, translationFromHeaders }
+    return { translate, time, useTranslation, pages, page, defaultLocale: local, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation, getLocaleFromHeaders: fromHeaders, translationFromHeaders, useTime }
 
 }
