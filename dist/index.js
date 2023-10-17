@@ -22,7 +22,8 @@ export function createTranslation(settings) {
         }
     }
     const locales = settings.locales;
-    const local = settings.defaultLocale && typeof settings.defaultLocale === 'string' ? settings.defaultLocale : Object.keys(locales)[0];
+    const allowedLocales = Object.keys(locales);
+    const local = settings.defaultLocale && typeof settings.defaultLocale === 'string' ? settings.defaultLocale : allowedLocales[0];
     const locale = locales[local];
     let query = settings.query || local;
     const genericPage = Object.keys(locale)[0];
@@ -109,6 +110,7 @@ export function createTranslation(settings) {
             return (settings.onFail || (() => '⚠️'))(e);
         }
     }
+    const useTime = Object.assign(time, { now: Object.assign(() => time(Date.now(), 'md'), { use: (format, prefferedLocale) => time(Date.now(), format, prefferedLocale) }) });
     function useTranslation(page, fixedLocale, fixedVariables) {
         setLocale(fixedLocale || query);
         const Variables = fixedVariables || {};
@@ -128,11 +130,11 @@ export function createTranslation(settings) {
                 });
             });
         });
-        const g = { ...translations };
+        const g = translations;
         const t = Object.assign(translations[P], {
-            g, time, intl: Intl
+            g, time: useTime, intl: Intl, locale: getLocale()
         });
-        return { t, tr: translate, g: t.g, pages: t.g, time, i: Intl, locale: getLocale() };
+        return { t, tr: translate, g, pages: g, time: useTime, useTime, intl: Intl, i: Intl, locale: getLocale(), locales: allowedLocales };
     }
     function translation(fixedLocale) {
         setLocale(fixedLocale || query);
@@ -141,22 +143,38 @@ export function createTranslation(settings) {
         };
     }
     function fromHeaders(header) {
-        let list = {};
-        const keys = Object.keys(locales).map(l => { list[l] = 0; return l; });
-        header.get('accept-language')?.toLowerCase().split(';').map(a => a.includes(',') ? keys.map(k => a.includes(k.toLowerCase()) ? list[k]++ : '') : a.split(',').map(b => keys.map(k => b.includes(k.toLowerCase()) ? list[k] = list[k] + 0.5 : '')));
-        header.get('referer')?.split('/')[3].toLowerCase().split('0').map(a => keys.map(k => a.includes(k.toLowerCase()) ? list[k]++ : ''));
-        header.get('cookie')?.split(';').filter(c => c.match(/(locale|LOCALE|lang)/gi)).map(a => a.split('=')[1].toLowerCase().split('0').map(b => keys.map(k => b.includes(k.toLowerCase()) ? list[k]++ : '')));
-        // get the most used locale
-        Object.keys(list).map((k, i) => keys[i] = { locale: k, count: list[k] });
-        return keys.sort((a, b) => b.count - a.count)[0]?.locale;
+        return getLocaleFromHeaders(header, allowedLocales);
+    }
+    function fromPathname(pathname) {
+        return getLocaleFromPathname(pathname, allowedLocales);
     }
     function translationFromHeaders(header) {
         return translation(fromHeaders(header));
+    }
+    function translationFromPathname(pathname) {
+        return translation(fromPathname(pathname));
     }
     const pages = Object.keys(locale);
     const page = pages[0];
     const localeList = Object.keys(locales);
     const allowedLocale = localeList[0];
-    return { translate, time, useTranslation, pages, page, defaultLocale: local, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation, getLocaleFromHeaders: fromHeaders, translationFromHeaders };
+    return { translate, time, useTranslation, pages, page, defaultLocale: local, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation, getLocaleFromHeaders: fromHeaders, translationFromHeaders, useTime, translationFromPathname };
+}
+export function getLocaleFromPathname(pathname, locales) {
+    const lang = pathname.split('/')[1];
+    const local = lang.split('-')[0].toLowerCase();
+    if (locales.includes(local))
+        return local;
+    return locales[0];
+}
+export function getLocaleFromHeaders(header, locales) {
+    let list = {};
+    const keys = locales.map(l => { list[l] = 0; return l; });
+    header.get('accept-language')?.toLowerCase().split(';').map(a => a.includes(',') ? keys.map(k => a.includes(k.toLowerCase()) ? list[k]++ : '') : a.split(',').map(b => keys.map(k => b.includes(k.toLowerCase()) ? list[k] = list[k] + 0.5 : '')));
+    header.get('referer')?.split('/')[3].toLowerCase().split('0').map(a => (a.split('-')[0].length == 2) && keys.map(k => a.includes(k.toLowerCase()) ? list[k] = list[k] + 2 : ''));
+    header.get('cookie')?.split(';').filter(c => c.match(/(locale|LOCALE|lang)/gi)).map(a => a.split('=')[1].toLowerCase().split('0').map(b => keys.map(k => b.includes(k.toLowerCase()) ? list[k]++ : '')));
+    // get the most used locale
+    Object.keys(list).map((k, i) => keys[i] = { locale: k, count: list[k] });
+    return keys.sort((a, b) => b.count - a.count)[0]?.locale;
 }
 //# sourceMappingURL=index.js.map
