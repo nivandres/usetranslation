@@ -37,6 +37,6 @@ const { t } = translation("en").useTranslation("salute");
 
 console.log(
 
-    t.g('salute','hello')
+    t.time.now()
 
 )

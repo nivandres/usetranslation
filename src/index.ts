@@ -88,8 +88,9 @@ export function createTranslation
     }
 
     const locales = settings.locales as { [locale in AllowedTranslations]: Translation };
+    const allowedLocales = Object.keys(locales) as AllowedTranslations[]
     type Locales = keyof typeof locales
-    const local = settings.defaultLocale && typeof settings.defaultLocale === 'string' ? settings.defaultLocale as MainTranslation : Object.keys(locales)[0] as MainTranslation
+    const local = settings.defaultLocale && typeof settings.defaultLocale === 'string' ? settings.defaultLocale as MainTranslation : allowedLocales[0] as MainTranslation
     type Local = typeof local
     const locale = locales[local]
     type Locale = typeof locale
@@ -275,10 +276,10 @@ export function createTranslation
         const g: TranslationGlobal = translations
 
         const t: Translation = Object.assign(translations[P], {
-            g, time: useTime, intl: Intl
+            g, time: useTime, intl: Intl, locale: getLocale()
         })
 
-        return { t, tr: translate, g, pages: g, time: useTime, useTime, i: Intl, locale: getLocale() }
+        return { t, tr: translate, g, pages: g, time: useTime, useTime, intl: Intl ,i: Intl, locale: getLocale(), locales: allowedLocales }
 
     }
 
@@ -290,24 +291,19 @@ export function createTranslation
     }
 
     function fromHeaders(header: Headers) {
-        let list = {
-        } as Record<string, number>
-        const keys = Object.keys(locales).map(l => { list[l] = 0; return l }) as any[]
+        return getLocaleFromHeaders(header, allowedLocales)
+    }
 
-        header.get('accept-language')?.toLowerCase().split(';').map(a => a.includes(',') ? keys.map(k => a.includes(k.toLowerCase()) ? list[k]++ : '') : a.split(',').map(b => keys.map(k => b.includes(k.toLowerCase()) ? list[k] = list[k] + 0.5 : '')))
-
-        header.get('referer')?.split('/')[3].toLowerCase().split('0').map(a => keys.map(k => a.includes(k.toLowerCase()) ? list[k] = list[k] + 2 : ''))
-
-        header.get('cookie')?.split(';').filter(c => c.match(/(locale|LOCALE|lang)/gi)).map(a => a.split('=')[1].toLowerCase().split('0').map(b => keys.map(k => b.includes(k.toLowerCase()) ? list[k]++ : '')))
-
-        // get the most used locale
-        Object.keys(list).map((k, i) => keys[i] = { locale: k, count: list[k] })
-
-        return keys.sort((a, b) => b.count - a.count)[0]?.locale as AllowedTranslations
+    function fromPathname(pathname: string) {
+        return getLocaleFromPathname(pathname, allowedLocales)
     }
 
     function translationFromHeaders(header: Headers) {
         return translation(fromHeaders(header))
+    }
+
+    function translationFromPathname(pathname: string) {
+        return translation(fromPathname(pathname))
     }
 
     const pages = Object.keys(locale) as Pages[]
@@ -316,6 +312,32 @@ export function createTranslation
     const localeList = Object.keys(locales) as AllowedTranslations[]
     const allowedLocale = localeList[0] as AllowedTranslations
 
-    return { translate, time, useTranslation, pages, page, defaultLocale: local, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation, getLocaleFromHeaders: fromHeaders, translationFromHeaders, useTime }
+    return { translate, time, useTranslation, pages, page, defaultLocale: local, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation, getLocaleFromHeaders: fromHeaders, translationFromHeaders, useTime, translationFromPathname }
+
+}
+
+export function getLocaleFromPathname<AllowedLocales extends ISO>(pathname: string, locales: AllowedLocales[]): AllowedLocales {
+    const lang = pathname.split('/')[1]
+    const local = lang.split('-')[0].toLowerCase() as AllowedLocales
+    if (locales.includes(local)) return local
+    return locales[0]
+}
+
+export function getLocaleFromHeaders<AllowedLocales extends ISO>(header: Headers, locales: AllowedLocales[]): AllowedLocales {
+
+    let list = {
+    } as Record<string, number>
+    const keys = locales.map(l => { list[l] = 0; return l }) as any[]
+
+    header.get('accept-language')?.toLowerCase().split(';').map(a => a.includes(',') ? keys.map(k => a.includes(k.toLowerCase()) ? list[k]++ : '') : a.split(',').map(b => keys.map(k => b.includes(k.toLowerCase()) ? list[k] = list[k] + 0.5 : '')))
+
+    header.get('referer')?.split('/')[3].toLowerCase().split('0').map(a => (a.split('-')[0].length == 2) && keys.map(k => a.includes(k.toLowerCase()) ? list[k] = list[k] + 2 : ''))
+
+    header.get('cookie')?.split(';').filter(c => c.match(/(locale|LOCALE|lang)/gi)).map(a => a.split('=')[1].toLowerCase().split('0').map(b => keys.map(k => b.includes(k.toLowerCase()) ? list[k]++ : '')))
+
+    // get the most used locale
+    Object.keys(list).map((k, i) => keys[i] = { locale: k, count: list[k] })
+
+    return keys.sort((a, b) => b.count - a.count)[0]?.locale as AllowedLocales
 
 }
