@@ -29,7 +29,7 @@ export function createTranslation
         QueryLanguage extends AllowedTranslations,
         Format extends JSONFormat,
         Translation extends JSONTranslation,
-        Pages extends keyof Format & keyof Translation & string,
+        Pages extends string,
     >
     (
         settings: {
@@ -39,7 +39,6 @@ export function createTranslation
             },
             defaultLocale?: MainTranslation | Translation
 
-            pageList?: Pages[]
             replacement?: string | {
                 init: string,
                 end: string
@@ -88,9 +87,9 @@ export function createTranslation
 
     const locales = settings.locales as { [locale in AllowedTranslations]: Translation };
     const allowedLocales = Object.keys(locales) as AllowedTranslations[]
-    type Locales = keyof typeof locales
+    // type Locales = keyof typeof locales
     const local = settings.defaultLocale && typeof settings.defaultLocale === 'string' ? settings.defaultLocale as MainTranslation : allowedLocales[0] as MainTranslation
-    type Local = typeof local
+    // type Local = typeof local
     const locale = locales[local]
     type Locale = typeof locale
 
@@ -98,23 +97,17 @@ export function createTranslation
     const page = pages[0] as Pages
 
     const localeList = Object.keys(locales) as AllowedTranslations[]
-    const allowedLocale = localeList[0] as AllowedTranslations
+    const allowedLocale = localeList[0]
 
     let query: AllowedTranslations = settings.query || local
     type JSON = Locale
 
     type Keys<P extends Pages> = keyof Locale[P]
 
-    const genericPage = Object.keys(locale)[0] as Pages
-    type GenericPage = Pages
-    type GenericKey = Keys<GenericPage>
-
     const types = {
         allowedLocale: allowedLocale,
         pages: pages,
         page: page,
-        genericPage: genericPage,
-        genericKey: Object.keys(locale[genericPage])[0] as GenericKey
     }
 
     type placeholder<P extends Pages, K extends Keys<P>> =
@@ -130,18 +123,16 @@ export function createTranslation
         setLocale = (locale: AllowedTranslations) => { query = locale; return settings.state?.setState(locale) }
     }
 
-    type translationQuery<P extends Pages, K extends Keys<P>> = string[] | string | {
-        readonly base: string | string[],
-        readonly values?: placeholder<P, K>
-    }
+    // type translationQuery<P extends Pages, K extends Keys<P>> = string[] | string | {
+    //     readonly base: string | string[],
+    //     readonly values?: placeholder<P, K>
+    // }
 
     type translatedDetails <QueryPage extends Pages, QueryKey extends Keys<QueryPage>> = {
         readonly from: MainTranslation,
         readonly to: QueryLanguage,
-        readonly query: QueryLanguage,
         readonly page: QueryPage,
         readonly key: QueryKey,
-        readonly raw: string,
         readonly original: { base: string | string[], values: Record<keyof placeholder<QueryPage, QueryKey>, string> }
         readonly variables: placeholder<QueryPage, QueryKey>
     }
@@ -152,8 +143,8 @@ export function createTranslation
 
     function translate<P extends Pages, K extends Keys<P>>(page: P, key: K, variables?: placeholder<P, K>, prefferedLocale?: AllowedTranslations): translatedQuery<P,K> {
         const l = prefferedLocale || getLocale();
-        let translation = locales[l]?.[page]?.[key] as (translationQuery<P, K> | undefined)
-        const original = locale[page][key] as translationQuery<P, K>
+        let translation = locales[l]?.[page]?.[key] as any
+        const original = locale[page][key] as any
         if (!translation) {
             translation = settings.onNotTranslation ? settings.onNotTranslation(original, page, String(key), l, variables) : original
         }
@@ -273,11 +264,11 @@ export function createTranslation
 
     type useTranslationOutput<Page extends Pages> = {
         t: Translations<Page>,
-        tr: typeof translate,
+        // tr: typeof translate,
         g: TranslationGlobal<Page>,
-        pages: TranslationGlobal<Page>,
+        // pages: TranslationGlobal<Page>,
         time: typeof useTime,
-        useTime: typeof useTime,
+        // useTime: typeof useTime,
         intl: typeof Intl,
         i: typeof Intl,
         locale: AllowedTranslations,
@@ -285,17 +276,16 @@ export function createTranslation
         types: typeof types
     }
 
-    function useTranslation<Page extends Pages, Key extends Keys<Page>>(page?: Page, fixedLocale?: AllowedTranslations, fixedVariables?: Record<string, string | number>): useTranslationOutput<Page> {
-
+    function useTranslation<Page extends Pages/*, Key extends Keys<Page>*/>(page?: Page, fixedLocale?: AllowedTranslations, fixedVariables?: Record<string, string | number>): useTranslationOutput<Page> {
         setLocale(fixedLocale || query);
         const Variables = fixedVariables || {}
 
         let translations: any = new Object(translate)
-
+        
         Object.keys(locale).forEach((p) => {
-
+        
             const page = p as Pages
-
+        
             translations[page] = new Object(
                 <K extends Keys<typeof page>>(
                     key: K,
@@ -305,7 +295,7 @@ export function createTranslation
                     return translate(page, key, { ...Variables as placeholder<typeof page, K>, ...variables }, prefferedLocale);
                 }
             )
-
+           
             Object.keys(locale[page]).forEach((k) => {
 
                 const key = k as Keys<typeof page>
@@ -319,21 +309,24 @@ export function createTranslation
                         values: typeof value != 'string' ? value.values : {}
                     }
                 )
-
+           
             })
-
+        
         })
-        const g: TranslationGlobal<Page> = translations
-
-        const t: Translations<Page> = Object.assign(translations[page], {
+        const g: any = translations
+        const t: any = Object.assign(translations[page], {
             g, time: useTime, intl: Intl, locale: getLocale()
         })
-
-        return { t, tr: translate, g, pages: g, time: useTime, useTime, intl: Intl, i: Intl, locale: getLocale(), locales: allowedLocales, types }
+       
+        return { t, g, time: useTime, intl: Intl, i: Intl, locale: getLocale(), locales: allowedLocales, types }
 
     }
 
-    function translation(fixedLocale?: AllowedTranslations) {
+    type translationOutput = {
+        useTranslation: <P extends Pages>(page?: P, fixedVariables?: Record<string, string | number>, prefferedLocale?: AllowedTranslations) => useTranslationOutput<P>
+    }
+
+    function translation(fixedLocale?: AllowedTranslations): translationOutput {
         setLocale(fixedLocale || query);
         return {
             useTranslation: <Page extends Pages>(page?: Page, fixedVariables?: Record<string, string | number>): useTranslationOutput<Page> => useTranslation(page, fixedLocale || query, fixedVariables)
@@ -348,24 +341,14 @@ export function createTranslation
         return getLocaleFromPathname(pathname, allowedLocales)
     }
 
-    function translationFromHeaders(header: Headers) {
-        return translation(fromHeaders(header))
-    }
+    // function translationFromHeaders(header: Headers) {
+    //     return translation(fromHeaders(header))
+    // }
 
-    function translationFromPathname(pathname: string) {
-        return translation(fromPathname(pathname))
-    }
-
-    function translationFrom(translationGetter:typeof translation) {
-        return <P extends Pages>(page?: P, fixedVariables?: Record<string,string|number>,prefferedLocale?: AllowedTranslations)=>{
-            return translationGetter().useTranslation<P>(page, fixedVariables)
-        }
-    }
-
-    function translationFromCallback(callback: () => AllowedTranslations) {
+    function translationFromCallback(callback: () => AllowedTranslations): translationOutput['useTranslation'] {
         return <P extends Pages>(page?: P, fixedVariables?: Record<string,string|number>,prefferedLocale?: AllowedTranslations)=>{
             return translation(prefferedLocale || callback()).useTranslation<P>(page, fixedVariables)
-        }
+        } 
     }
 
     // async function translationFromAsyncCallback(callback: () => Promise<AllowedTranslations>) {
@@ -375,7 +358,7 @@ export function createTranslation
     // }
 
 
-    return { translate, time, useTranslation, pages, page, defaultLocale: local, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation, getLocaleFromHeaders: fromHeaders, translationFromHeaders, useTime, translationFromPathname, translationFromCallback, setLocale, getLocale, translationFrom, from: translationFrom, fromPathname, fromHeaders, getLocaleFromPathname: fromPathname }
+    return { time, pages, page, defaultLocale: local, main: local, locales: localeList, locale: allowedLocale, translations: locales,  translation, useTime, translationFromCallback,getLocaleFromHeaders: fromHeaders, getLocaleFromPathname: fromPathname, types }
 
 }
 
