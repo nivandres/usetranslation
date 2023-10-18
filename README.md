@@ -150,7 +150,7 @@ console.log(t.ready) // "Enjoy your t object :)"
 ```
 ---
 
-## Use translation on NextJs 🔮
+## Use translation on NextJs 🧑‍🚀
 
 ### next/pages
 
@@ -210,14 +210,16 @@ import * as es from "@/public/locales/es.json"
 
 import { createTranslation } from "nivandres-use-translation"
 
-const { translationFromHeaders } = createTranslation({
+const { translationFromCallback, getLocaleFromHeaders } = createTranslation({
     locales: { en, es },
     defaultLocale: 'en'
 })
 
 import { headers } from "next/headers"
 
-export const { useTranslation } = translationFromHeaders(headers());
+export const useTranslation = translationFromCallback(()=>{
+    return getLocaleFromHeaders(headers())
+})
 ```
 
 #### Config File for Client Component
