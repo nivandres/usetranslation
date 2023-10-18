@@ -16,11 +16,12 @@ type JSONTranslation = {
     };
 };
 type JSONFormat = JSONFix<unknown, JSONFix<unknown, unknown>>;
-export declare function createTranslation<AllowedTranslations extends ISO, MainTranslation extends AllowedTranslations, QueryLanguage extends AllowedTranslations, Format extends JSONFormat, Translation extends JSONTranslation, Pages extends keyof Translation, DefinedPages extends string>(settings: {
+export declare function createTranslation<AllowedTranslations extends ISO, MainTranslation extends AllowedTranslations, QueryLanguage extends AllowedTranslations, Format extends JSONFormat, Translation extends JSONTranslation, Pages extends keyof Format & keyof Translation & string>(settings: {
     locales?: {
-        [translation in AllowedTranslations]: JSONStrict<Format> & Translation & Record<DefinedPages, unknown>;
+        [translation in AllowedTranslations]: JSONStrict<Format> & Translation & Record<Pages, unknown>;
     };
     defaultLocale?: MainTranslation | Translation;
+    pageList?: Pages[];
     replacement?: string | {
         init: string;
         end: string;
@@ -57,103 +58,92 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
         readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K]["values"] : string, string | number> : never;
     };
     time: (time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) => string;
-    useTranslation: <Page extends Pages, Key extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page]>(page?: Page | undefined, fixedLocale?: AllowedTranslations, fixedVariables?: Record<string, string | number>) => {
-        t: ((<P_1 extends Page, K_1 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1]>(page: P_1, key: K_1, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+    useTranslation: <Page extends Pages, Key extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page]>(page: Page, fixedLocale?: AllowedTranslations, fixedVariables?: Record<string, string | number>) => {
+        t: (<K_1 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page]>(key: K_1, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_1]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
             readonly from: MainTranslation;
             readonly to: QueryLanguage;
             readonly query: QueryLanguage;
-            readonly page: P_1;
+            readonly page: Page;
             readonly key: K_1;
             readonly original: {
                 base: string;
-                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1]["values"] : string, string | number> : never), string>;
+                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_1]["values"] : string, string | number> : never), string>;
             };
-            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1]["values"] : string, string | number> : never;
-        }) & { [P_2 in Pages]: (<K_2 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_2, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_1]["values"] : string, string | number> : never;
+        }) & { [K_2 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page]]: {
             readonly from: MainTranslation;
             readonly to: QueryLanguage;
             readonly query: QueryLanguage;
-            readonly page: P_2;
+            readonly page: Page;
             readonly key: K_2;
             readonly original: {
                 base: string;
-                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2]["values"] : string, string | number> : never), string>;
+                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2]["values"] : string, string | number> : never), string>;
             };
-            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2]["values"] : string, string | number> : never;
-        }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2] extends infer T extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2] ? { [K_3 in T]: {
-            readonly from: MainTranslation;
-            readonly to: QueryLanguage;
-            readonly query: QueryLanguage;
-            readonly page: P_2;
-            readonly key: K_3;
-            readonly original: {
-                base: string;
-                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never), string>;
-            };
-            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never;
+            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2]["values"] : string, string | number> : never;
         } & {
-            use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+            use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
-                readonly page: P_2;
-                readonly key: K_3;
+                readonly page: Page;
+                readonly key: K_2;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never;
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2]["values"] : string, string | number> : never;
             };
-            values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never;
-        } & string; } : never); })[Page] & {
-            g: (<P_1 extends Page, K_1 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1]>(page: P_1, key: K_1, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+            values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page][K_2]["values"] : string, string | number> : never;
+        } & string; } & {
+            g: (<P_1 extends Page, K_3 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1]>(page: P_1, key: K_3, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
                 readonly page: P_1;
-                readonly key: K_1;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1]["values"] : string, string | number> : never;
-            }) & { [P_2 in Pages]: (<K_2 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_2, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_2;
-                readonly key: K_2;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2]["values"] : string, string | number> : never;
-            }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2] extends infer T extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2] ? { [K_3 in T]: {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_2;
                 readonly key: K_3;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never;
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3]["values"] : string, string | number> : never;
+            }) & { [P_2 in Pages]: (<K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                readonly from: MainTranslation;
+                readonly to: QueryLanguage;
+                readonly query: QueryLanguage;
+                readonly page: P_2;
+                readonly key: K_4;
+                readonly original: {
+                    base: string;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never), string>;
+                };
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never;
+            }) & { [K_5 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]]: {
+                readonly from: MainTranslation;
+                readonly to: QueryLanguage;
+                readonly query: QueryLanguage;
+                readonly page: P_2;
+                readonly key: K_5;
+                readonly original: {
+                    base: string;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
+                };
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
             } & {
-                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
                     readonly page: P_2;
-                    readonly key: K_3;
+                    readonly key: K_5;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never;
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
                 };
-                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never;
-            } & string; } : never); } & Function;
+                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
+            } & string; }; } & Function;
             time: ((time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) => string) & {
                 now: (() => string) & {
                     use: (format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: AllowedTranslations) => string;
@@ -174,102 +164,102 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
             };
             readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K]["values"] : string, string | number> : never;
         };
-        g: (<P_1 extends Page, K_1 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1]>(page: P_1, key: K_1, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+        g: (<P_1 extends Page, K_3 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1]>(page: P_1, key: K_3, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
             readonly from: MainTranslation;
             readonly to: QueryLanguage;
             readonly query: QueryLanguage;
             readonly page: P_1;
-            readonly key: K_1;
-            readonly original: {
-                base: string;
-                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1]["values"] : string, string | number> : never), string>;
-            };
-            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1]["values"] : string, string | number> : never;
-        }) & { [P_2 in Pages]: (<K_2 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_2, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
-            readonly from: MainTranslation;
-            readonly to: QueryLanguage;
-            readonly query: QueryLanguage;
-            readonly page: P_2;
-            readonly key: K_2;
-            readonly original: {
-                base: string;
-                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2]["values"] : string, string | number> : never), string>;
-            };
-            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2]["values"] : string, string | number> : never;
-        }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2] extends infer T extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2] ? { [K_3 in T]: {
-            readonly from: MainTranslation;
-            readonly to: QueryLanguage;
-            readonly query: QueryLanguage;
-            readonly page: P_2;
             readonly key: K_3;
             readonly original: {
                 base: string;
-                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never), string>;
+                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3]["values"] : string, string | number> : never), string>;
             };
-            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never;
+            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3]["values"] : string, string | number> : never;
+        }) & { [P_2 in Pages]: (<K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+            readonly from: MainTranslation;
+            readonly to: QueryLanguage;
+            readonly query: QueryLanguage;
+            readonly page: P_2;
+            readonly key: K_4;
+            readonly original: {
+                base: string;
+                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never), string>;
+            };
+            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never;
+        }) & { [K_5 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]]: {
+            readonly from: MainTranslation;
+            readonly to: QueryLanguage;
+            readonly query: QueryLanguage;
+            readonly page: P_2;
+            readonly key: K_5;
+            readonly original: {
+                base: string;
+                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
+            };
+            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
         } & {
-            use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+            use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
                 readonly page: P_2;
-                readonly key: K_3;
+                readonly key: K_5;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never;
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
             };
-            values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never;
-        } & string; } : never); };
-        pages: (<P_1 extends Page, K_1 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1]>(page: P_1, key: K_1, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+            values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
+        } & string; }; };
+        pages: (<P_1 extends Page, K_3 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1]>(page: P_1, key: K_3, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
             readonly from: MainTranslation;
             readonly to: QueryLanguage;
             readonly query: QueryLanguage;
             readonly page: P_1;
-            readonly key: K_1;
-            readonly original: {
-                base: string;
-                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1]["values"] : string, string | number> : never), string>;
-            };
-            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_1]["values"] : string, string | number> : never;
-        }) & { [P_2 in Pages]: (<K_2 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_2, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
-            readonly from: MainTranslation;
-            readonly to: QueryLanguage;
-            readonly query: QueryLanguage;
-            readonly page: P_2;
-            readonly key: K_2;
-            readonly original: {
-                base: string;
-                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2]["values"] : string, string | number> : never), string>;
-            };
-            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_2]["values"] : string, string | number> : never;
-        }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2] extends infer T extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2] ? { [K_3 in T]: {
-            readonly from: MainTranslation;
-            readonly to: QueryLanguage;
-            readonly query: QueryLanguage;
-            readonly page: P_2;
             readonly key: K_3;
             readonly original: {
                 base: string;
-                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never), string>;
+                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3]["values"] : string, string | number> : never), string>;
             };
-            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never;
+            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_1][K_3]["values"] : string, string | number> : never;
+        }) & { [P_2 in Pages]: (<K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+            readonly from: MainTranslation;
+            readonly to: QueryLanguage;
+            readonly query: QueryLanguage;
+            readonly page: P_2;
+            readonly key: K_4;
+            readonly original: {
+                base: string;
+                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never), string>;
+            };
+            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never;
+        }) & { [K_5 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]]: {
+            readonly from: MainTranslation;
+            readonly to: QueryLanguage;
+            readonly query: QueryLanguage;
+            readonly page: P_2;
+            readonly key: K_5;
+            readonly original: {
+                base: string;
+                values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
+            };
+            readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
         } & {
-            use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+            use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
                 readonly page: P_2;
-                readonly key: K_3;
+                readonly key: K_5;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never;
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
             };
-            values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_3]["values"] : string, string | number> : never;
-        } & string; } : never); };
+            values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
+        } & string; }; };
         time: ((time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) => string) & {
             now: (() => string) & {
                 use: (format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: AllowedTranslations) => string;
@@ -294,103 +284,92 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
     translations: { [locale in AllowedTranslations]: Translation; };
     genericPage: Pages;
     translation: (fixedLocale?: AllowedTranslations) => {
-        useTranslation: (page?: Pages, fixedVariables?: Record<string, string | number>) => {
-            t: ((<P_3 extends Pages, K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+        useTranslation: <Page_1 extends Pages>(page: Page_1, fixedVariables?: Record<string, string | number>) => {
+            t: (<K_6 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1]>(key: K_6, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
-                readonly page: P_3;
-                readonly key: K_4;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never;
-            }) & { [P_4 in Pages]: (<K_5 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4]>(key: K_5, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_4;
-                readonly key: K_5;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never;
-            }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] extends infer T_1 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] ? { [K_6 in T_1]: {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_4;
+                readonly page: Page_1;
                 readonly key: K_6;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6]["values"] : string, string | number> : never;
+            }) & { [K_7 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1]]: {
+                readonly from: MainTranslation;
+                readonly to: QueryLanguage;
+                readonly query: QueryLanguage;
+                readonly page: Page_1;
+                readonly key: K_7;
+                readonly original: {
+                    base: string;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never), string>;
+                };
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never;
             } & {
-                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
-                    readonly page: P_4;
-                    readonly key: K_6;
+                    readonly page: Page_1;
+                    readonly key: K_7;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never;
                 };
-                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
-            } & string; } : never); })[Pages] & {
-                g: (<P_3 extends Pages, K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never;
+            } & string; } & {
+                g: (<P_3 extends Page_1, K_8 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_8, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
                     readonly page: P_3;
+                    readonly key: K_8;
+                    readonly original: {
+                        base: string;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never), string>;
+                    };
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never;
+                }) & { [P_2 in Pages]: (<K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                    readonly from: MainTranslation;
+                    readonly to: QueryLanguage;
+                    readonly query: QueryLanguage;
+                    readonly page: P_2;
                     readonly key: K_4;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never;
-                }) & { [P_4 in Pages]: (<K_5 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4]>(key: K_5, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never;
+                }) & { [K_5 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]]: {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
-                    readonly page: P_4;
+                    readonly page: P_2;
                     readonly key: K_5;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never;
-                }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] extends infer T_1 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] ? { [K_6 in T_1]: {
-                    readonly from: MainTranslation;
-                    readonly to: QueryLanguage;
-                    readonly query: QueryLanguage;
-                    readonly page: P_4;
-                    readonly key: K_6;
-                    readonly original: {
-                        base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
-                    };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
                 } & {
-                    use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                    use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                         readonly from: MainTranslation;
                         readonly to: QueryLanguage;
                         readonly query: QueryLanguage;
-                        readonly page: P_4;
-                        readonly key: K_6;
+                        readonly page: P_2;
+                        readonly key: K_5;
                         readonly original: {
                             base: string;
-                            values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                            values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                         };
-                        readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                        readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
                     };
-                    values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
-                } & string; } : never); } & Function;
+                    values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
+                } & string; }; } & Function;
                 time: ((time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) => string) & {
                     now: (() => string) & {
                         use: (format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: AllowedTranslations) => string;
@@ -411,102 +390,102 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
                 };
                 readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K]["values"] : string, string | number> : never;
             };
-            g: (<P_3 extends Pages, K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+            g: (<P_3 extends Page_1, K_8 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_8, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
                 readonly page: P_3;
+                readonly key: K_8;
+                readonly original: {
+                    base: string;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never), string>;
+                };
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never;
+            }) & { [P_2 in Pages]: (<K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                readonly from: MainTranslation;
+                readonly to: QueryLanguage;
+                readonly query: QueryLanguage;
+                readonly page: P_2;
                 readonly key: K_4;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never;
-            }) & { [P_4 in Pages]: (<K_5 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4]>(key: K_5, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never;
+            }) & { [K_5 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]]: {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
-                readonly page: P_4;
+                readonly page: P_2;
                 readonly key: K_5;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never;
-            }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] extends infer T_1 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] ? { [K_6 in T_1]: {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_4;
-                readonly key: K_6;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
             } & {
-                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
-                    readonly page: P_4;
-                    readonly key: K_6;
+                    readonly page: P_2;
+                    readonly key: K_5;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
                 };
-                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
-            } & string; } : never); };
-            pages: (<P_3 extends Pages, K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
+            } & string; }; };
+            pages: (<P_3 extends Page_1, K_8 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_8, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
                 readonly page: P_3;
+                readonly key: K_8;
+                readonly original: {
+                    base: string;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never), string>;
+                };
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never;
+            }) & { [P_2 in Pages]: (<K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                readonly from: MainTranslation;
+                readonly to: QueryLanguage;
+                readonly query: QueryLanguage;
+                readonly page: P_2;
                 readonly key: K_4;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never;
-            }) & { [P_4 in Pages]: (<K_5 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4]>(key: K_5, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never;
+            }) & { [K_5 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]]: {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
-                readonly page: P_4;
+                readonly page: P_2;
                 readonly key: K_5;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never;
-            }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] extends infer T_1 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] ? { [K_6 in T_1]: {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_4;
-                readonly key: K_6;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
             } & {
-                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
-                    readonly page: P_4;
-                    readonly key: K_6;
+                    readonly page: P_2;
+                    readonly key: K_5;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
                 };
-                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
-            } & string; } : never); };
+                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
+            } & string; }; };
             time: ((time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) => string) & {
                 now: (() => string) & {
                     use: (format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: AllowedTranslations) => string;
@@ -525,103 +504,92 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
     };
     getLocaleFromHeaders: (header: Headers) => AllowedTranslations;
     translationFromHeaders: (header: Headers) => {
-        useTranslation: (page?: Pages, fixedVariables?: Record<string, string | number>) => {
-            t: ((<P_3 extends Pages, K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+        useTranslation: <Page_1 extends Pages>(page: Page_1, fixedVariables?: Record<string, string | number>) => {
+            t: (<K_6 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1]>(key: K_6, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
-                readonly page: P_3;
-                readonly key: K_4;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never;
-            }) & { [P_4 in Pages]: (<K_5 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4]>(key: K_5, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_4;
-                readonly key: K_5;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never;
-            }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] extends infer T_2 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] ? { [K_6 in T_2]: {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_4;
+                readonly page: Page_1;
                 readonly key: K_6;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6]["values"] : string, string | number> : never;
+            }) & { [K_7 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1]]: {
+                readonly from: MainTranslation;
+                readonly to: QueryLanguage;
+                readonly query: QueryLanguage;
+                readonly page: Page_1;
+                readonly key: K_7;
+                readonly original: {
+                    base: string;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never), string>;
+                };
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never;
             } & {
-                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
-                    readonly page: P_4;
-                    readonly key: K_6;
+                    readonly page: Page_1;
+                    readonly key: K_7;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never;
                 };
-                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
-            } & string; } : never); })[Pages] & {
-                g: (<P_3 extends Pages, K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never;
+            } & string; } & {
+                g: (<P_3 extends Page_1, K_8 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_8, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
                     readonly page: P_3;
+                    readonly key: K_8;
+                    readonly original: {
+                        base: string;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never), string>;
+                    };
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never;
+                }) & { [P_2 in Pages]: (<K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                    readonly from: MainTranslation;
+                    readonly to: QueryLanguage;
+                    readonly query: QueryLanguage;
+                    readonly page: P_2;
                     readonly key: K_4;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never;
-                }) & { [P_4 in Pages]: (<K_5 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4]>(key: K_5, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never;
+                }) & { [K_5 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]]: {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
-                    readonly page: P_4;
+                    readonly page: P_2;
                     readonly key: K_5;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never;
-                }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] extends infer T_2 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] ? { [K_6 in T_2]: {
-                    readonly from: MainTranslation;
-                    readonly to: QueryLanguage;
-                    readonly query: QueryLanguage;
-                    readonly page: P_4;
-                    readonly key: K_6;
-                    readonly original: {
-                        base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
-                    };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
                 } & {
-                    use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                    use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                         readonly from: MainTranslation;
                         readonly to: QueryLanguage;
                         readonly query: QueryLanguage;
-                        readonly page: P_4;
-                        readonly key: K_6;
+                        readonly page: P_2;
+                        readonly key: K_5;
                         readonly original: {
                             base: string;
-                            values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                            values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                         };
-                        readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                        readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
                     };
-                    values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
-                } & string; } : never); } & Function;
+                    values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
+                } & string; }; } & Function;
                 time: ((time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) => string) & {
                     now: (() => string) & {
                         use: (format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: AllowedTranslations) => string;
@@ -642,102 +610,102 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
                 };
                 readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K]["values"] : string, string | number> : never;
             };
-            g: (<P_3 extends Pages, K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+            g: (<P_3 extends Page_1, K_8 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_8, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
                 readonly page: P_3;
+                readonly key: K_8;
+                readonly original: {
+                    base: string;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never), string>;
+                };
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never;
+            }) & { [P_2 in Pages]: (<K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                readonly from: MainTranslation;
+                readonly to: QueryLanguage;
+                readonly query: QueryLanguage;
+                readonly page: P_2;
                 readonly key: K_4;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never;
-            }) & { [P_4 in Pages]: (<K_5 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4]>(key: K_5, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never;
+            }) & { [K_5 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]]: {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
-                readonly page: P_4;
+                readonly page: P_2;
                 readonly key: K_5;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never;
-            }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] extends infer T_2 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] ? { [K_6 in T_2]: {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_4;
-                readonly key: K_6;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
             } & {
-                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
-                    readonly page: P_4;
-                    readonly key: K_6;
+                    readonly page: P_2;
+                    readonly key: K_5;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
                 };
-                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
-            } & string; } : never); };
-            pages: (<P_3 extends Pages, K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
+            } & string; }; };
+            pages: (<P_3 extends Page_1, K_8 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_8, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
                 readonly page: P_3;
+                readonly key: K_8;
+                readonly original: {
+                    base: string;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never), string>;
+                };
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never;
+            }) & { [P_2 in Pages]: (<K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                readonly from: MainTranslation;
+                readonly to: QueryLanguage;
+                readonly query: QueryLanguage;
+                readonly page: P_2;
                 readonly key: K_4;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never;
-            }) & { [P_4 in Pages]: (<K_5 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4]>(key: K_5, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never;
+            }) & { [K_5 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]]: {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
-                readonly page: P_4;
+                readonly page: P_2;
                 readonly key: K_5;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never;
-            }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] extends infer T_2 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] ? { [K_6 in T_2]: {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_4;
-                readonly key: K_6;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
             } & {
-                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
-                    readonly page: P_4;
-                    readonly key: K_6;
+                    readonly page: P_2;
+                    readonly key: K_5;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
                 };
-                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
-            } & string; } : never); };
+                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
+            } & string; }; };
             time: ((time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) => string) & {
                 now: (() => string) & {
                     use: (format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: AllowedTranslations) => string;
@@ -760,103 +728,92 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
         };
     };
     translationFromPathname: (pathname: string) => {
-        useTranslation: (page?: Pages, fixedVariables?: Record<string, string | number>) => {
-            t: ((<P_3 extends Pages, K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+        useTranslation: <Page_1 extends Pages>(page: Page_1, fixedVariables?: Record<string, string | number>) => {
+            t: (<K_6 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1]>(key: K_6, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
-                readonly page: P_3;
-                readonly key: K_4;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never;
-            }) & { [P_4 in Pages]: (<K_5 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4]>(key: K_5, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_4;
-                readonly key: K_5;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never;
-            }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] extends infer T_3 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] ? { [K_6 in T_3]: {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_4;
+                readonly page: Page_1;
                 readonly key: K_6;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_6]["values"] : string, string | number> : never;
+            }) & { [K_7 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1]]: {
+                readonly from: MainTranslation;
+                readonly to: QueryLanguage;
+                readonly query: QueryLanguage;
+                readonly page: Page_1;
+                readonly key: K_7;
+                readonly original: {
+                    base: string;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never), string>;
+                };
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never;
             } & {
-                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
-                    readonly page: P_4;
-                    readonly key: K_6;
+                    readonly page: Page_1;
+                    readonly key: K_7;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never;
                 };
-                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
-            } & string; } : never); })[Pages] & {
-                g: (<P_3 extends Pages, K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][Page_1][K_7]["values"] : string, string | number> : never;
+            } & string; } & {
+                g: (<P_3 extends Page_1, K_8 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_8, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
                     readonly page: P_3;
+                    readonly key: K_8;
+                    readonly original: {
+                        base: string;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never), string>;
+                    };
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never;
+                }) & { [P_2 in Pages]: (<K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                    readonly from: MainTranslation;
+                    readonly to: QueryLanguage;
+                    readonly query: QueryLanguage;
+                    readonly page: P_2;
                     readonly key: K_4;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never;
-                }) & { [P_4 in Pages]: (<K_5 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4]>(key: K_5, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never;
+                }) & { [K_5 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]]: {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
-                    readonly page: P_4;
+                    readonly page: P_2;
                     readonly key: K_5;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never;
-                }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] extends infer T_3 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] ? { [K_6 in T_3]: {
-                    readonly from: MainTranslation;
-                    readonly to: QueryLanguage;
-                    readonly query: QueryLanguage;
-                    readonly page: P_4;
-                    readonly key: K_6;
-                    readonly original: {
-                        base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
-                    };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
                 } & {
-                    use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                    use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                         readonly from: MainTranslation;
                         readonly to: QueryLanguage;
                         readonly query: QueryLanguage;
-                        readonly page: P_4;
-                        readonly key: K_6;
+                        readonly page: P_2;
+                        readonly key: K_5;
                         readonly original: {
                             base: string;
-                            values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                            values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                         };
-                        readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                        readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
                     };
-                    values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
-                } & string; } : never); } & Function;
+                    values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
+                } & string; }; } & Function;
                 time: ((time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) => string) & {
                     now: (() => string) & {
                         use: (format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: AllowedTranslations) => string;
@@ -877,102 +834,102 @@ export declare function createTranslation<AllowedTranslations extends ISO, MainT
                 };
                 readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P][K]["values"] : string, string | number> : never;
             };
-            g: (<P_3 extends Pages, K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+            g: (<P_3 extends Page_1, K_8 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_8, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
                 readonly page: P_3;
+                readonly key: K_8;
+                readonly original: {
+                    base: string;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never), string>;
+                };
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never;
+            }) & { [P_2 in Pages]: (<K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                readonly from: MainTranslation;
+                readonly to: QueryLanguage;
+                readonly query: QueryLanguage;
+                readonly page: P_2;
                 readonly key: K_4;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never;
-            }) & { [P_4 in Pages]: (<K_5 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4]>(key: K_5, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never;
+            }) & { [K_5 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]]: {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
-                readonly page: P_4;
+                readonly page: P_2;
                 readonly key: K_5;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never;
-            }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] extends infer T_3 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] ? { [K_6 in T_3]: {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_4;
-                readonly key: K_6;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
             } & {
-                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
-                    readonly page: P_4;
-                    readonly key: K_6;
+                    readonly page: P_2;
+                    readonly key: K_5;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
                 };
-                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
-            } & string; } : never); };
-            pages: (<P_3 extends Pages, K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
+            } & string; }; };
+            pages: (<P_3 extends Page_1, K_8 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3]>(page: P_3, key: K_8, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
                 readonly page: P_3;
+                readonly key: K_8;
+                readonly original: {
+                    base: string;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never), string>;
+                };
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_8]["values"] : string, string | number> : never;
+            }) & { [P_2 in Pages]: (<K_4 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]>(key: K_4, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                readonly from: MainTranslation;
+                readonly to: QueryLanguage;
+                readonly query: QueryLanguage;
+                readonly page: P_2;
                 readonly key: K_4;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_3][K_4]["values"] : string, string | number> : never;
-            }) & { [P_4 in Pages]: (<K_5 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4]>(key: K_5, variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_4]["values"] : string, string | number> : never;
+            }) & { [K_5 in keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2]]: {
                 readonly from: MainTranslation;
                 readonly to: QueryLanguage;
                 readonly query: QueryLanguage;
-                readonly page: P_4;
+                readonly page: P_2;
                 readonly key: K_5;
                 readonly original: {
                     base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never), string>;
+                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                 };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_5]["values"] : string, string | number> : never;
-            }) & (keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] extends infer T_3 extends keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4] ? { [K_6 in T_3]: {
-                readonly from: MainTranslation;
-                readonly to: QueryLanguage;
-                readonly query: QueryLanguage;
-                readonly page: P_4;
-                readonly key: K_6;
-                readonly original: {
-                    base: string;
-                    values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
-                };
-                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
             } & {
-                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
+                use: (variables?: ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never) | undefined, prefferedLocale?: AllowedTranslations) => {
                     readonly from: MainTranslation;
                     readonly to: QueryLanguage;
                     readonly query: QueryLanguage;
-                    readonly page: P_4;
-                    readonly key: K_6;
+                    readonly page: P_2;
+                    readonly key: K_5;
                     readonly original: {
                         base: string;
-                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never), string>;
+                        values: Record<keyof ({ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never), string>;
                     };
-                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
+                    readonly variables: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
                 };
-                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_4][K_6]["values"] : string, string | number> : never;
-            } & string; } : never); };
+                values: { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends TranslationValue<any> ? Record<{ [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5] extends translationPlaceholder<any> ? keyof { [locale in AllowedTranslations]: Translation; }[MainTranslation][P_2][K_5]["values"] : string, string | number> : never;
+            } & string; }; };
             time: ((time: Date | number | string | undefined, format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: ISO) => string) & {
                 now: (() => string) & {
                     use: (format?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | Record<string, any>, prefferedLocale?: AllowedTranslations) => string;

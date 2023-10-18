@@ -25,6 +25,10 @@ export function createTranslation(settings) {
     const allowedLocales = Object.keys(locales);
     const local = settings.defaultLocale && typeof settings.defaultLocale === 'string' ? settings.defaultLocale : allowedLocales[0];
     const locale = locales[local];
+    const pages = Object.keys(locale);
+    const page = pages[0];
+    const localeList = Object.keys(locales);
+    const allowedLocale = localeList[0];
     let query = settings.query || local;
     const genericPage = Object.keys(locale)[0];
     let getLocale = () => query;
@@ -114,7 +118,6 @@ export function createTranslation(settings) {
     function useTranslation(page, fixedLocale, fixedVariables) {
         setLocale(fixedLocale || query);
         const Variables = fixedVariables || {};
-        const P = page || genericPage;
         let translations = new Object(translate);
         Object.keys(locale).forEach((p) => {
             const page = p;
@@ -131,7 +134,7 @@ export function createTranslation(settings) {
             });
         });
         const g = translations;
-        const t = Object.assign(translations[P], {
+        const t = Object.assign(translations[page], {
             g, time: useTime, intl: Intl, locale: getLocale()
         });
         return { t, tr: translate, g, pages: g, time: useTime, useTime, intl: Intl, i: Intl, locale: getLocale(), locales: allowedLocales };
@@ -154,10 +157,6 @@ export function createTranslation(settings) {
     function translationFromPathname(pathname) {
         return translation(fromPathname(pathname));
     }
-    const pages = Object.keys(locale);
-    const page = pages[0];
-    const localeList = Object.keys(locales);
-    const allowedLocale = localeList[0];
     return { translate, time, useTranslation, pages, page, defaultLocale: local, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation, getLocaleFromHeaders: fromHeaders, translationFromHeaders, useTime, translationFromPathname };
 }
 export function getLocaleFromPathname(pathname, locales) {
