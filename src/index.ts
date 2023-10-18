@@ -323,7 +323,15 @@ export function createTranslation
         return translation(fromPathname(pathname))
     }
 
-    return { translate, time, useTranslation, pages, page, defaultLocale: local, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation, getLocaleFromHeaders: fromHeaders, translationFromHeaders, useTime, translationFromPathname }
+    function translationFromCallback(callback: () => AllowedTranslations) {
+        return translation(callback())
+    }
+
+    async function translationFromAsyncCallback(callback: () => Promise<AllowedTranslations>) {
+        return translation(await callback())
+    }
+
+    return { translate, time, useTranslation, pages, page, defaultLocale: local, main: local, locales: localeList, locale: allowedLocale, translations: locales, genericPage, translation, getLocaleFromHeaders: fromHeaders, translationFromHeaders, useTime, translationFromPathname, translationFromCallback, translationFromAsyncCallback }
 
 }
 
