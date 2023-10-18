@@ -2,9 +2,11 @@
 
 ## Translation Hook for Web Development
 
+---
+
 ### Hello there 👋
 
-This is a personal translation library that I use for my own projects. I use it mainly for NextJs projects, but can be used for any other kind of project. Just it is still not 100% finished and polished ⚠️
+This is a personal translation library that I use for my own projects. I use it mainly for NextJs projects, but can be used for any other kind of project. Only that it is still not 100% finished and polished ⚠️
 
 > Import you JSON Translation files and start using them with a completion typesafe amazing dev experience
 
@@ -18,26 +20,36 @@ export default function HomePage () {
 
     return (<div>
     
-        {/* Get string as an object */}
+        {/* Get translations as an object */}
         <h1>{t.title}</h1>
 
         {/* Use variables in your translation */}
         <h2>{t.welcome.use({ user: "Iván" })}</h2>
 
-        {/* Use it as you want with autocomplete*/}
+        {/* Use it however you want with autocomplete*/}
         <p>{t('main', {
             // Premade time format settings. xs, sm, md, lg, xl
-            time: t.time(Date.now(), 'lg')
+            time: t.time.now('lg') // t.time(new Date(),'md')
         } )}</p>
+
+        {/* Translation from lists*/}
+        <ul>
+            <li>{t.features[0]}</li>
+            <li>{t.features[1]}</li>
+            <li>{t.features[2].use({ name: "Ivan", time: t.time.now() })}</li>
+            <li>{t('features',{version:"1.2.0"})[3]}</li>
+        </ul>
 
     </div>)
 
 }
 ```
 
+---
+
 ## How to set up 🏗️
 
-### First format your JSON Translation files
+### First, format your JSON Translation files
 
 Your JSON files with their translations values must be configured in a 2 layers deep object structure, so that each translation is defined by a page (general group of translations) and a specific key.
 
@@ -53,7 +65,7 @@ Your JSON files with their translations values must be configured in a 2 layers 
 }
 ```
 
-Your translations can have placeholders, that can be replaced with variables. For example, `Hello {user}!` has a user variable, that can be replaced.
+Your translations can have multiple placeholders, that can be replaced with variables. For example, `Hello {user}!` has a user variable, that can be replaced.
 We can define these variables in these way:
 
 ```JSON
@@ -73,7 +85,7 @@ The library through typescript can have an autocomplete for each translation and
 
 Anyway you can run the replace functions without declaring its values, but it won't have autocomplete.
 
-Remember all your JSON Files should have the same structure, pages, and keys elements. In case there is some difference between the files, typescript should detect it and warn you.
+Remember all your JSON Files for each language should have the same structure, pages, and keys elements. In case there is some difference between the files, typescript should detect it and warn you.
 
 
 ```JSON
@@ -92,6 +104,26 @@ Remember all your JSON Files should have the same structure, pages, and keys ele
 
 Those are not declared values, it can be replaced, but no will be detected for typescript.
 
+But it is not all. You can declare translation lists, for more dynamic usage in your project.
+```JSON
+{
+    "store": {
+        "product_title": ["sunglasses","watch","chain"],
+        "product_description": {
+            "base": [
+                "These stylish sunglasses cost ${price} and offer 100% UV protection.",
+                "The elegant watch is priced at just ${price} and comes with a stainless steel strap.",
+                "Our fashionable chains are available for just ${price} and make a perfect accessory."
+            ],
+            "values": {
+                "price": 10
+            }
+        }
+    }
+}
+```
+You can access all individually and apply .use method for modify each variable for each translated string.
+
 ### Create translation configuration file ⚙️
 
 Create a custom setup file for importing your JSON translation files. `/libs/lang.ts`
@@ -108,15 +140,15 @@ const { translation } = createTranslation({
     // other settings like replacement placeholders, states, etc...
 })
 
-const { useTranslation } = translation('es') // Use any other hook for fix the query language
+export const { useTranslation } = translation('es') // Use any other hook for fix the query language
 
-// Then you can export `useTtranslation`
+// Then you can import `useTtranslation`
 
 const { t } = useTranslation('test')
 
 console.log(t.ready) // "Enjoy your t object :)"
-
 ```
+---
 
 ## Use translation on NextJs 🔮
 
@@ -130,22 +162,21 @@ import * as es from "@/public/locales/es.json"
 
 import { createTranslation } from "use-translation"
 
-const { translation, page, locale } = createTranslation({
+const { translationFromCallback } = createTranslation({
     locales: { en, es },
     defaultLocale: en // you can define it with the full object.
     onNotTranslation: (queryValue, queryPage, queryKey, queryLanguage) => {
-        // handle external translation API for example...
+        // When translation not foun, handle external translation API for example...
         return '😵'
     }
 })
 
 import { useRouter } from "next/router";
 
-export function useTranslation (page?: typeof page, fixedLanguage?: typeof locale) {
+export const useTranslation = translationFromCallback(()=>{
     const router = useRouter();
-    const { useTranslation: t } = translation(router.locale)
-    return t;
-}
+    return router.locale as "en" | "es"
+})
 ```
 
 That's all needed to start working with { t }. Also you can handle it however you want.
@@ -171,7 +202,7 @@ export default HomePage() {
 
 ### next/app
 
-#### Config File
+#### Config File for Server Component
 
 ```javascript
 import * as en from "@/public/locales/en.json"
@@ -189,10 +220,30 @@ import { headers } from "next/headers"
 export const { useTranslation } = translationFromHeaders(headers());
 ```
 
+#### Config File for Client Component
+```javascript
+import * as en from "@/public/locales/en.json"
+import * as es from "@/public/locales/es.json"
+
+import { createTranslation } from "nivandres-use-translation"
+
+const { translationFromPathname, getLocaleFromPathname } = createTranslation({
+    locales: { en, es },
+    defaultLocale: 'en'
+})
+
+import { usePathname } from "next/navigation"
+
+export const useTranslation = translationFromCallback(()=>{
+    return getLocaleFromPathname(usePathname())
+})
+```
+
 ## Features 🗽
 
 - 100% type safe. You get type completion everywhere. Even the output strings have their properties with more details and type safe.
-- You can use translations as object translation or function method object tree.
+- You can use translations as an object translation or function method object tree.
+- You can declare translation lists and use it with all the translation methods and handle it like an array
 
 ```javascript
 const originalString = t.welcome.use({/*You get completion here*/}).original.base // original string
@@ -203,7 +254,7 @@ const welcomestring = g.homepage.welcome
 const welcomewithvariables = g("homepage","welcome",{user:"ivan"})
 ```
 
-- You can format time
+- Also you can easily format the time
 
 ```javascript
 const { t, g, time } = useTranslation("global")
