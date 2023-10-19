@@ -46,7 +46,7 @@ export function createTranslation(settings) {
     function translate(page, key, variables, prefferedLocale) {
         const l = prefferedLocale || getLocale();
         let translation = locales[l]?.[page]?.[key];
-        const original = locale[page][key];
+        const original = locale[page][key] ?? { base: key, values: {} };
         if (!translation) {
             translation = settings.onNotTranslation ? settings.onNotTranslation(original, page, String(key), l, variables) : original;
         }
@@ -148,6 +148,8 @@ export function createTranslation(settings) {
         let translations = new Object(translate);
         Object.keys(locale).forEach((p) => {
             const page = p;
+            if (page === 'default')
+                return;
             translations[page] = new Object((key, variables, prefferedLocale) => {
                 return translate(page, key, { ...Variables, ...variables }, prefferedLocale);
             });
