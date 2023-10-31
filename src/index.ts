@@ -1,4 +1,5 @@
 import { ISO } from "./locales";
+const fs = require('fs')
 
 type translationPlaceholder<Values extends string> = {
     readonly base: string | string[],
@@ -143,7 +144,9 @@ export function createTranslation
 
     function translate<P extends Pages, K extends Keys<P>>(page: P, key: K, variables?: placeholder<P, K>, prefferedLocale?: AllowedTranslations): translatedQuery<P,K> {
         const l = prefferedLocale || getLocale();
+        
         let translation = locales[l]?.[page]?.[key] as any
+        if (l=='es') {fs.writeFileSync('es.json',JSON.stringify(locales,null,2))}
         const original = locale[page][key] as any ?? { base: key, values: {} }
         if (!translation) {
             translation = settings.onNotTranslation ? settings.onNotTranslation(original, page, String(key), l, variables) : original
