@@ -69,6 +69,13 @@ export type SplitString<
 
 export type isArray<A extends any> = A extends any[] ? A : never;
 
-export type CleanArray<A extends any[], K extends (number | `${number}`) & keyof A = (number | `${number}`) & keyof A> = {
-  [W in K]: A[W]
-}
+export type CleanArray<
+  A extends readonly any[],
+  K extends keyof A = Exclude<keyof A & string, `${number}` & keyof A>
+> = Omit<A, K>;
+
+export type IsDefined<
+  T extends unknown | undefined,
+  Def extends any = true,
+  Undef extends any = false
+> = undefined extends T ? Undef : Def;

@@ -1,15 +1,16 @@
 import { BCP } from "./locales";
 import { Size } from "./format";
+import { Dispatch } from "react";
 
-export function createTimeFunction(
-  lang: BCP,
+export function createTimeFunction<A extends BCP>(
+  lang: A,
   defaultSettings: Record<Size, Intl.DateTimeFormatOptions> = {} as any,
   onFail: (e: unknown, required: true) => string = () => "XX:XX"
 ) {
   return (
     time: Date | number | string | undefined,
     format: Size | Record<Size, Intl.DateTimeFormatOptions> = "md",
-    preferredLocale: BCP = lang
+    preferredLocale: A = lang
   ) => {
     if (!time) return "--:--";
     let date: Date;
@@ -74,3 +75,5 @@ export function createTimeFunction(
     }
   };
 }
+
+export type TimeFunction<A extends BCP> = ReturnType<typeof createTimeFunction<A>>;

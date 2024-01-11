@@ -1,5 +1,5 @@
 import { FormatList } from "./locales";
-import { filter, valueof } from "./utils";
+import { CleanArray, filter, valueof } from "./utils";
 
 export const reserveKeys = [
   "key",
@@ -123,7 +123,7 @@ export function processNode(
   return processedNode;
 }
 
-export type ReplacementParams = { init: string; end: string };
+export type ReplacementParams = { init: string, end: string };
 
 export type Replacement =
   | string
@@ -162,7 +162,7 @@ export const getReplacement = (r: Replacement): ReplacementParams => {
       end = defaultReplacement.end;
       break;
   }
-  return { init, end };
+  return { init: String(init || '{'), end: String(end || '}') };
 };
 
 export type ProcessNode<
@@ -230,4 +230,3 @@ export type FollowWay<N extends Node, W extends string[]> = W extends [
       : N
     : N
   : N;
-

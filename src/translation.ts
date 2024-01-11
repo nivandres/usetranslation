@@ -1,3 +1,4 @@
+import React, { Dispatch, useMemo, useState } from "react";
 import {
   Node,
   Keep,
@@ -7,43 +8,65 @@ import {
   reserveKeys,
   Size,
 } from "./format";
+import { BCP, defaultLocale, getLocaleFromBCP } from "./locales";
+import { Translation, UseHook, GetHook, LocaleList, LocaleDetail } from "./types";
 import { createTimeFunction } from "./functions";
-import { BCP } from "./locales";
-import { Translation } from "./types";
-import { injectVariables, valueof } from "./utils";
+import { HookFunction, SetStaticState, useLangHook } from "./hook";
+import { injectVariables } from "./utils";
+import { match } from "@formatjs/intl-localematcher";
+
+function s(p: string[], t: any) {
+  const k = p.shift();
+  if (k === undefined || [...reserveKeys, "base", "values"].includes(k)) {
+    return t;
+  } else if (t[k]) {
+    return s(p, t[k]);
+  } else {
+    return t;
+  }
+}
 
 export function createTranslation<
+  O extends any,
   AllowedTranslation extends BCP,
   MainTranslation extends AllowedTranslation,
   Tree extends Node,
   Variables extends Placeholder
->({
-  locales,
-  main,
-  replacement,
-  variables,
-  timeFormatOptions,
-  onNotTranslated,
-  onFail,
-}: {
-  locales: {
-    [translation in AllowedTranslation]: Keep<Tree>;
-  };
-  main?: MainTranslation | Tree;
-  variables?: Variables;
-  replacement?: Replacement;
-  timeFormatOptions?: Record<Size, Intl.DateTimeFormatOptions>;
-  onFail?: <R extends boolean>(
-    e: unknown,
-    required: R
-  ) => R extends true ? string : undefined | void;
-  onNotTranslated?: (
-    queryString: string,
-    queryLanguage: AllowedTranslation,
-    variables: Placeholder
-  ) => string;
-}) {
-  let translation = {} as any;
+>(
+  {
+    locales,
+    defaultLocale: main,
+    replacement,
+    variables,
+    timeFormatOptions,
+    onNotTranslated,
+    onFail,
+    hook: hook_function,
+    static: static_hook,
+    debug,
+  }: {
+    locales: {
+      [translation in AllowedTranslation]: Keep<Tree>;
+    };
+    defaultLocale?: MainTranslation | Exclude<Tree, AllowedTranslation | MainTranslation>;
+    variables?: Variables;
+    replacement?: Replacement;
+    static?: boolean;
+    hook?: HookFunction<O, AllowedTranslation, MainTranslation>;
+    timeFormatOptions?: Record<Size, Intl.DateTimeFormatOptions>;
+    onFail?: <R extends boolean>(
+      e: unknown,
+      required: R
+    ) => R extends true ? string : undefined | void;
+    onNotTranslated?: (
+      queryString: string,
+      queryLanguage: AllowedTranslation,
+      variables: Placeholder
+    ) => string;
+    debug?: boolean;
+  },
+  hook?: HookFunction<O, AllowedTranslation, MainTranslation>
+) {
   const langs = Object.keys(locales) as AllowedTranslation[];
   const reference = (
     !main
@@ -58,6 +81,8 @@ export function createTranslation<
       : ((langs.find((l) => (locales[l] == reference ? true : false)) ||
           "unknown") as MainTranslation);
 
+  let translation = { langs, ref, main: ref, times: {}, localeList: {}, locales: [] } as any;
+
   function traverse<N extends Node>(
     translated: Keep<N>,
     original: Keep<N>,
@@ -65,11 +90,13 @@ export function createTranslation<
       values: Placeholder;
       parent: any;
       child: string;
+      god?: boolean;
       lang: AllowedTranslation;
     }
   ) {
     const r = processNode(original);
     const n = processNode(translated);
+    let d: any = {};
 
     const values = { ...r.values, ...n.values, ...heritage.values };
     const children = n.children;
@@ -83,13 +110,24 @@ export function createTranslation<
       replacement
     );
 
-    const use = (variables: Placeholder) => {
+    const useV = (variables: Placeholder) => {
       const { parent, child, values } = heritage;
       return (parent[child] = traverse(translated, original, {
         ...heritage,
         values: { ...heritage.values, ...values, ...variables },
       }));
     };
+
+    const use = heritage.god
+      ? (variables: Placeholder) => {
+          let nd = {} as any;
+          langs.forEach((l) => {
+            nd[l] = translation[l].use(variables);
+          });
+
+          return (translation = Object.assign(useV(variables), nd));
+        }
+      : useV;
 
     const search = (...req: any[]) => {
       let variables: any = undefined;
@@ -116,23 +154,22 @@ export function createTranslation<
       } else {
         return d;
       }
-      function s(p: string[], t: any) {
-        const k = p.shift();
-        if (k === undefined || [...reserveKeys, "base", "values"].includes(k)) {
-          return t;
-        } else if (t[k]) {
-          return s(p, t[k]);
-        } else {
-          return t;
-        }
+      if (heritage.god) {
+        let nd = {} as any;
+        langs.forEach((l) => {
+          nd[l] = s(
+            path,
+            variables ? translation[l].use(variables) : translation[l]
+          );
+        });
+        return Object.assign(nd[heritage.lang], nd);
       }
       return s(path, variables ? use(variables) : d);
     };
 
-    let d: any;
-
     const details = {
       base: base ?? null,
+      raw: n.base,
       values,
       children,
       search,
@@ -143,14 +180,30 @@ export function createTranslation<
       fix: use,
       do: search,
       set: use,
+      go: search,
+      path: search,
+      find: search,
+      f: search,
+      intl: Intl,
+      Intl: Intl,
+      langs,
+      t: d,
+      g: translation,
+      local: heritage.parent,
+      locale: translation.localeList[heritage.lang],
+      parent: heritage.parent,
+      p: heritage.parent,
+      l: heritage.parent,
+      time: translation.times[heritage.lang],
       setVariables: use,
       variables: values,
       original: r.base || "",
       query: heritage.lang,
       from: ref,
-      locales: langs,
+      locales: translation.locales,
       heritage: heritage.values,
       child: heritage.child,
+      heaven: () => (heritage.god = true),
     };
 
     d = Object.assign((base ?? search) as unknown as object, {
@@ -166,34 +219,143 @@ export function createTranslation<
         child: c,
         lang: heritage.lang,
       });
+      d[c].t = d[c];
     });
 
     return d;
   }
 
   langs.map((lang) => {
-    translation[lang] = traverse(locales[lang] as any, reference as any, {
-      values: { ...(variables || {}) },
-      parent: translation,
-      child: lang,
-      lang,
-    });
-    translation[lang].time = createTimeFunction(
+    translation.times[lang] = createTimeFunction(
       lang,
       timeFormatOptions,
       onFail
     );
-    translation[lang].intl = Intl;
-    translation[lang].Intl = Intl;
+    let detail = Object.assign(getLocaleFromBCP(lang), {
+      lang,
+      locale: lang,
+    });
+    translation.localeList[lang] = detail
+    translation.locales.push(detail)
+    translation[lang] = traverse(locales[lang] as any, reference as any, {
+      values: { ...(variables || {}) },
+      parent: translation,
+      child: lang,
+      god: ref === lang ? true : undefined,
+      lang,
+    });
+    translation[lang].g = translation;
+    translation[lang].t = translation[lang];
   });
 
-  translation = Object.assign(translation, translation[ref]);
-  translation.langs = langs;
-
-  return translation as Translation<
+  translation = Object.assign(translation[ref], translation);
+  const t = translation as Translation<
     Tree,
     AllowedTranslation,
     MainTranslation,
     Variables
   >;
+
+  const useTranslation: UseHook<AllowedTranslation, Tree, Variables, O> = (
+    path,
+    default_variables
+  ) => {
+    let h: [AllowedTranslation, Function, any] = [ref, SetStaticState, {}];
+    if (!static_hook) {
+      const u =
+        ((hook || hook_function || useLangHook) as any)(
+          langs,
+          ref,
+          (s: any, r: any, h: any) => {
+            if (s) {
+              const m = match(typeof s === "string" ? [s] : s, langs, ref);
+              if (r) {
+                return Object.assign(m, {
+                  value: m,
+                  setValue: h || {},
+                  return: r,
+                }) as any;
+              } else {
+                return m as any;
+              }
+            } else {
+              return ref as any;
+            }
+          },
+          ref
+        ) || ref;
+      if (typeof u === "string") {
+        h[0] = u as any;
+      } else if (typeof u === "object") {
+        h[0] = u.value || u[0] || h[0];
+        h[1] = u.setValue || u[1] || h[1];
+        h[2] = u.return || u.hook || u[2] || u[1] || h[2];
+      }
+    }
+    const [values, setValues] = useState<Placeholder>({
+      ...(variables || {}),
+      ...(default_variables || {}),
+    });
+    const [lang, setLang] = static_hook
+      ? (useState<AllowedTranslation>(ref) as any)
+      : h;
+
+    SetStaticState(lang);
+    // @ts-ignore
+    t[lang] = t[lang] || t[ref];
+    // @ts-ignore
+    t[lang].heaven();
+    const tr = path // @ts-ignore
+      ? (t[lang as any].search(
+          path,
+          default_variables ? values : undefined
+        ) as any)
+      : // @ts-ignore
+        (t[lang as any].use(default_variables ? values : undefined) as any);
+
+    return Object.assign(
+      [tr, setLang, setValues, h[2]],
+      Object.fromEntries(
+        Object.entries(tr).filter(([key]) => !Number.isInteger(key))
+      ) as any,
+      {
+        setLang,
+        setValues,
+        hook: h[2],
+      }
+    ) as any;
+  };
+
+  const getTranslation: GetHook<AllowedTranslation, Tree, Variables> = (
+    path,
+    default_variables
+  ) => {
+    const values: Placeholder = {
+      ...(variables || {}),
+      ...(default_variables || {}),
+    };
+    const tr = path
+      ? // @ts-ignore
+        (t.search(path, default_variables ? values : undefined) as any)
+      : // @ts-ignore
+        (t.use(default_variables ? values : undefined) as any);
+    return Object.assign(
+      [tr, tr.time, Intl] as any,
+      Object.fromEntries(
+        Object.entries(tr as any).filter(([key]) => !Number.isInteger(key))
+      ) as any
+    ) as any;
+  };
+
+  return {
+    t,
+    translation: t,
+    useTranslation,
+    getTranslation,
+    rsc: { useTranslation: getTranslation },
+    langs,
+    main: ref,
+    list: translation.localeList as Record<AllowedTranslation,LocaleDetail<AllowedTranslation>>,
+    locales: translation.locales as LocaleList<AllowedTranslation>,
+  };
 }

@@ -1,14 +1,11 @@
 {
   "name": "nivandres-use-translation",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.1",
   "description": "Use Translation Hook",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
     "test": "tsc"
-  },
-  "bin": {
-    "setup": "/script/setup.js"
   },
   "keywords": [
     "translation"
@@ -18,8 +15,6 @@
   "license": "ISC",
   "devDependencies": {
     "@types/bun": "^1.0.0",
-    "@types/js-cookie": "^3.0.6",
-    "@types/negotiator": "^0.6.3",
     "@types/node": "^20.10.5",
     "@types/react": "^18.2.47",
     "typescript": "^5.2.2"
@@ -35,7 +30,6 @@
   "homepage": "https://github.com/nivandres/usetranslation#readme",
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.5.2",
-    "js-cookie": "^3.0.5",
     "react": "^18.2.0"
   }
 }
