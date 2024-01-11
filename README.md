@@ -113,9 +113,10 @@ Also the variables can be global for a branch in translation node tree. For exam
         "account": {
             "values": {
                 "name": "User",
-                "email": "email@email.com"
+                "email": "email@email.com",
+                "hour": "The values are isolated from other Branches"
             },
-            "welcome": "Welcome {name}" // The values are isolated from other Branches
+            "welcome": "Welcome {name}"
         }
     }
 }
@@ -141,7 +142,7 @@ Those are not declared variables, it can be replaced, but no will be detected fo
 
 But it is not all. You can declare translation lists, for more dynamic usage in your project.
 
-```JSON
+```javascript
 {
     "store": {
         "product_title": ["sunglasses","watch","chain"], // you can put complex nodes into lists too
@@ -149,6 +150,7 @@ But it is not all. You can declare translation lists, for more dynamic usage in 
             "base": [ // base is the default text string for the curren node
                 "These stylish sunglasses cost ${price} and offer 100% UV protection.",
                 "The elegant watch is priced at just ${price} and comes with a stainless steel strap.",
+                // Each node inherits the values from its parent
                 "Our fashionable chains are available for just ${price} and make a perfect accessory."
             ],
             "values": {
@@ -298,15 +300,15 @@ import { createTranslation } from "use-translation"
 export const { useTranslation } = createTranslation({
     locales: { en, es },
     defaultLocale: en // you can define it with the full object.
-    onNotTranslated: (queryValue, queryPage, queryKey, queryLanguage) => {
+    onNotTranslated: (queryString, queryLanguage, queryValues) => {
         // When translation not found, handle external translation API for example...
         return '😵'
     },
-    hook: (langs,main,fix) => {
+    hook: (fix,langs,main) => { // You can modify the predetermined hook to use Next Router for example
         const router = useRouter();
         return fix(
             router.locale, // string
-            (l)=>router.push({ locale: l }), // function to mutate | PREFERABLY USE SETSTATE FUNCTION
+            (l)=>router.push({ locale: l }), // function to mutate | Or set state action dispatch
             router, // any value you want to return 
         )
     }

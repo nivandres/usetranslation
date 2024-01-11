@@ -1,6 +1,5 @@
 import { BCP } from "./locales";
 import { Size } from "./format";
-import { Dispatch } from "react";
 
 export function createTimeFunction<A extends BCP>(
   lang: A,

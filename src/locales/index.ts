@@ -1,4 +1,4 @@
-const LOCALES = [
+export const LOCALES = [
   {
     code: "aa",
     name: "Afar",
@@ -1810,11 +1810,9 @@ export type LocaleFromBCP<B extends BCP> = B extends `${infer I}-${infer R}`
 
 export type Format = BCP | Region;
 
-export const LocaleList = LOCALES;
+export const ISOList = LOCALES.map((l) => l.code);
 
-export const ISOList = LocaleList.map((l) => l.code);
-
-export const RegionList = LocaleList.map((l) => l.region).flat();
+export const RegionList = LOCALES.map((l) => l.region).flat();
 
 export const BCPList = LOCALES.map((l) => [
   l.code,

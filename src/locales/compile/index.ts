@@ -1,4 +1,4 @@
-import { LocaleList } from "..";
+import { LOCALES } from "..";
 import fs from "fs";
 
 export * from "./bcp";
@@ -7,11 +7,11 @@ export * from "./iso";
 const PATH = "./src/locales/compile/";
 
 export function getISORawList() {
-  return LocaleList.map((l) => `"${l.code}"`).join(" | ");
+  return LOCALES.map((l) => `"${l.code}"`).join(" | ");
 }
 
 export function getBCPRawList() {
-  return LocaleList.map((l) => [
+  return LOCALES.map((l) => [
     l.code,
     ...l.region.map((r) => `${l.code}-${r}`),
   ])

@@ -244,8 +244,7 @@ export type UseArr<
   T extends any,
   A extends string,
   V extends Placeholder,
-  O extends unknown
-> = CleanArray<[T, SetState<A>, SetState<Partial<V> & Placeholder>, O]>;
+> = CleanArray<[T, SetState<A>, SetState<Partial<V> & Placeholder>, any[]]>;
 
 export type GetArr<T extends any, A extends BCP> = CleanArray<
   [T, TimeFunction<A>, typeof Intl]
@@ -255,7 +254,6 @@ export type UseHook<
   A extends BCP,
   N extends Node,
   V extends Placeholder,
-  O extends any
 > = <
   D extends StringArray<isArray<SearchWays<N>>> | undefined,
   W extends FollowWay<N, SplitString<D extends string ? D : "">>,
@@ -264,11 +262,11 @@ export type UseHook<
 >(
   path?: D,
   variables?: Partial<V> & E
-) => UseArr<Translator<A, A, W, A, V & E>, A, E & V, O> &
+) => UseArr<Translator<A, A, W, A, V & E>, A, E & V> &
   T & {
     setLang: SetState<A>;
     setValue: SetState<Partial<E & V> & Placeholder>;
-    hook: O;
+    dependencies: any[];
   };
 
 export type GetHook<A extends BCP, N extends Node, V extends Placeholder> = <

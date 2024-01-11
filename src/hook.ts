@@ -1,45 +1,52 @@
-import React, { Dispatch, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { BCP } from "./locales";
 import { match } from "@formatjs/intl-localematcher";
 import { IsDefined } from "./utils";
 
 const lskey = `nivandres-use-translation[npm]/locale-language-selection`;
 
-export type SetState<T extends unknown = unknown> = Dispatch<React.SetStateAction<T>>;
+export type SetState<T extends unknown = unknown> = Dispatch<
+  React.SetStateAction<T>
+>;
 
 export type FixFunction<
   A extends BCP = unknown & BCP,
-  O extends unknown = unknown,
   M extends A = A
 > = <
-  T extends string | string[] | undefined,
-  S extends SetState<A> | undefined,
-  R extends O | undefined
+  T extends string | [string|A,...(string | A)[]] | A | undefined,
+  S extends ((value: SetStateAction<A>) => any) | undefined,
+  P2 extends any | undefined,
+  W extends IsDefined<T, T extends A ? T & A : T extends any[] ? T[keyof T] & A : A ,M>
 >(
-  string?: T,
-  hookReturn?: R,
-  stateHandler?: S
-) => IsDefined<
+  input?: T,
+  hook?: (S | any[]) & P2,
+  toReturn?: any[],
+) => A & IsDefined<
   T,
-  IsDefined<R, A & { value: A; setValue?: S; return?: R }, A>,
+  IsDefined<P2, W & { value: W; setValue?: S; dependencies?: any[] }, W>,
   M
 >;
 
 export type HookFunction<
-  Ot extends unknown = any,
-  At extends BCP = unknown & BCP,
+  At extends BCP = never,
   Mt extends At = At
-> = <A extends At, M extends Mt, O extends Ot>(
+> = <A extends At, M extends Mt>(
+  fix: FixFunction<A> & {
+    main: A;
+    langs: A[];
+    fix: FixFunction<A>;
+    stateHandler: SetState<A>
+    prev?: null | A;
+  },
   langs: A[],
   main: A,
-  fix: FixFunction<A, O>,
-  prev?: null | A
+  prev?: null
 ) =>
-  | A
-  | [A]
-  | [A, SetState<A>]
-  | [A, SetState<A>, O]
-  | { value: A; setValue?: SetState<A>; return?: O };
+  | At
+  | [At]
+  | [At, SetState<At>]
+  | [At, SetState<At>, any[]]
+  | { value: At; setValue?: SetState<At>; dependencies?: any[] };
 
 export function SetStaticState(l: string | SetState<string>) {
   // @ts-ignore
@@ -52,7 +59,7 @@ export function SetStaticState(l: string | SetState<string>) {
   }
 }
 
-export const useLangHook: HookFunction = (langs, main, fix) => {
+export const useLangHook: HookFunction = ({ main, langs, fix }) => {
   const [lang, setLang] = useState(main);
 
   useEffect(() => {

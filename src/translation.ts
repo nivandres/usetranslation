@@ -1,4 +1,4 @@
-import React, { Dispatch, useMemo, useState } from "react";
+import { useState } from "react";
 import {
   Node,
   Keep,
@@ -7,9 +7,16 @@ import {
   Replacement,
   reserveKeys,
   Size,
+  Base,
 } from "./format";
-import { BCP, defaultLocale, getLocaleFromBCP } from "./locales";
-import { Translation, UseHook, GetHook, LocaleList, LocaleDetail } from "./types";
+import { BCP, getLocaleFromBCP } from "./locales";
+import {
+  Translation,
+  UseHook,
+  GetHook,
+  LocaleList,
+  LocaleDetail,
+} from "./types";
 import { createTimeFunction } from "./functions";
 import { HookFunction, SetStaticState, useLangHook } from "./hook";
 import { injectVariables } from "./utils";
@@ -27,7 +34,6 @@ function s(p: string[], t: any) {
 }
 
 export function createTranslation<
-  O extends any,
   AllowedTranslation extends BCP,
   MainTranslation extends AllowedTranslation,
   Tree extends Node,
@@ -48,11 +54,16 @@ export function createTranslation<
     locales: {
       [translation in AllowedTranslation]: Keep<Tree>;
     };
-    defaultLocale?: MainTranslation | Exclude<Tree, AllowedTranslation | MainTranslation>;
+    defaultLocale?:
+      | MainTranslation
+      | Exclude<
+          Keep<Tree>,
+          AllowedTranslation | MainTranslation | Base | string
+        >;
     variables?: Variables;
     replacement?: Replacement;
     static?: boolean;
-    hook?: HookFunction<O, AllowedTranslation, MainTranslation>;
+    hook?: HookFunction<AllowedTranslation, MainTranslation>;
     timeFormatOptions?: Record<Size, Intl.DateTimeFormatOptions>;
     onFail?: <R extends boolean>(
       e: unknown,
@@ -65,7 +76,7 @@ export function createTranslation<
     ) => string;
     debug?: boolean;
   },
-  hook?: HookFunction<O, AllowedTranslation, MainTranslation>
+  hook?: HookFunction<AllowedTranslation, MainTranslation>
 ) {
   const langs = Object.keys(locales) as AllowedTranslation[];
   const reference = (
@@ -81,7 +92,14 @@ export function createTranslation<
       : ((langs.find((l) => (locales[l] == reference ? true : false)) ||
           "unknown") as MainTranslation);
 
-  let translation = { langs, ref, main: ref, times: {}, localeList: {}, locales: [] } as any;
+  let translation = {
+    langs,
+    ref,
+    main: ref,
+    times: {},
+    localeList: {},
+    locales: [],
+  } as any;
 
   function traverse<N extends Node>(
     translated: Keep<N>,
@@ -235,8 +253,8 @@ export function createTranslation<
       lang,
       locale: lang,
     });
-    translation.localeList[lang] = detail
-    translation.locales.push(detail)
+    translation.localeList[lang] = detail;
+    translation.locales.push(detail);
     translation[lang] = traverse(locales[lang] as any, reference as any, {
       values: { ...(variables || {}) },
       parent: translation,
@@ -256,7 +274,37 @@ export function createTranslation<
     Variables
   >;
 
-  const useTranslation: UseHook<AllowedTranslation, Tree, Variables, O> = (
+  function f (s: any, r: any, h: any) {
+    if (s) {
+      let m = ref;
+      try {
+        m =
+          (match(
+            (typeof s === "string" ? [s] : s).flat().flat(),
+            langs,
+            ref
+          ) as any) || ref;
+      } catch (err) {
+        (onFail as any || (() => {}))(err, false);
+      }
+      if (r) {
+        let st = SetStaticState
+        let o = typeof r === 'function' ? (st=r||st) && h : (st=h||st) && r;
+        return Object.assign(m, {
+          value: m,
+          setValue: st,
+          dependencies: o,
+        })
+      } else {
+        return m;
+      }
+    } else {
+      return ref;
+    }
+  }
+  
+
+  const useTranslation: UseHook<AllowedTranslation, Tree, Variables> = (
     path,
     default_variables
   ) => {
@@ -264,32 +312,19 @@ export function createTranslation<
     if (!static_hook) {
       const u =
         ((hook || hook_function || useLangHook) as any)(
+          Object.assign(f, { langs, main: ref, fix: f, prev: null, stateHandler: SetStaticState }),
           langs,
           ref,
-          (s: any, r: any, h: any) => {
-            if (s) {
-              const m = match(typeof s === "string" ? [s] : s, langs, ref);
-              if (r) {
-                return Object.assign(m, {
-                  value: m,
-                  setValue: h || {},
-                  return: r,
-                }) as any;
-              } else {
-                return m as any;
-              }
-            } else {
-              return ref as any;
-            }
-          },
-          ref
+          SetStaticState,
+          null,
+          f
         ) || ref;
       if (typeof u === "string") {
         h[0] = u as any;
       } else if (typeof u === "object") {
         h[0] = u.value || u[0] || h[0];
         h[1] = u.setValue || u[1] || h[1];
-        h[2] = u.return || u.hook || u[2] || u[1] || h[2];
+        h[2] = u.dependencies || u.hook || u[2] || u[1] || h[2];
       }
     }
     const [values, setValues] = useState<Placeholder>({
@@ -321,7 +356,7 @@ export function createTranslation<
       {
         setLang,
         setValues,
-        hook: h[2],
+        dependencies: h[2],
       }
     ) as any;
   };
@@ -355,7 +390,10 @@ export function createTranslation<
     rsc: { useTranslation: getTranslation },
     langs,
     main: ref,
-    list: translation.localeList as Record<AllowedTranslation,LocaleDetail<AllowedTranslation>>,
+    list: translation.localeList as Record<
+      AllowedTranslation,
+      LocaleDetail<AllowedTranslation>
+    >,
     locales: translation.locales as LocaleList<AllowedTranslation>,
   };
 }
