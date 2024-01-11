@@ -49,6 +49,7 @@ export function createTranslation<
     onFail,
     hook: hook_function,
     static: static_hook,
+    defaultCurrentTime,
     debug,
   }: {
     locales: {
@@ -60,6 +61,7 @@ export function createTranslation<
           Keep<Tree>,
           AllowedTranslation | MainTranslation | Base | string
         >;
+    defaultCurrentTime?: Date;
     variables?: Variables;
     replacement?: Replacement;
     static?: boolean;
@@ -247,7 +249,8 @@ export function createTranslation<
     translation.times[lang] = createTimeFunction(
       lang,
       timeFormatOptions,
-      onFail
+      onFail,
+      defaultCurrentTime,
     );
     let detail = Object.assign(getLocaleFromBCP(lang), {
       lang,

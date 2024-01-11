@@ -1,14 +1,16 @@
 import { BCP } from "./locales";
 import { Size } from "./format";
+import { useEffect, useState } from "react";
 
 export function createTimeFunction<A extends BCP>(
   lang: A,
   defaultSettings: Record<Size, Intl.DateTimeFormatOptions> = {} as any,
-  onFail: (e: unknown, required: true) => string = () => "XX:XX"
+  onFail: (e: unknown, required: true) => string = () => "XX:XX",
+  defaultCurrentTime: Date | undefined
 ) {
-  return (
+  const t = (
     time: Date | number | string | undefined,
-    format: Size | Record<Size, Intl.DateTimeFormatOptions> = "md",
+    format: Size | Intl.DateTimeFormatOptions = "md",
     preferredLocale: A = lang
   ) => {
     if (!time) return "--:--";
@@ -73,6 +75,40 @@ export function createTimeFunction<A extends BCP>(
       return onFail(e, true);
     }
   };
+
+  return Object.assign(t, {
+    use: (
+      format: Size | Intl.DateTimeFormatOptions = "md",
+      preferredLocale: A = lang
+    ) => {
+      return t(Date.now(), format, preferredLocale)
+    },
+    useNow: (
+      interval: number | undefined = undefined,
+      format: Size | Intl.DateTimeFormatOptions = "md",
+      preferredLocale: A = lang
+    ) => {
+      const [time, setTime] = useState(
+        defaultCurrentTime || new Date(1704999999999)
+      );
+      useEffect(() => {
+        let loop: NodeJS.Timeout;
+        if (interval) {
+          loop = setInterval(() => {
+            setTime(new Date());
+          }, interval);
+        } else {
+          setTime(new Date());
+        }
+        return () => {
+          if (loop) clearInterval(loop);
+        };
+      }, [interval]);
+      return t(time, format, preferredLocale);
+    },
+  });
 }
 
-export type TimeFunction<A extends BCP> = ReturnType<typeof createTimeFunction<A>>;
+export type TimeFunction<A extends BCP = BCP> = ReturnType<
+  typeof createTimeFunction<A>
+>;
