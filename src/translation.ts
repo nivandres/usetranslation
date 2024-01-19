@@ -37,6 +37,20 @@ function s(p: string[], t: any) {
   }
 }
 
+interface Props<
+  AllowedTranslation extends BCP = BCP,
+  Variables extends Placeholder = Placeholder
+> {
+  children?: React.ReactNode;
+  onlyClient?: boolean;
+  initialLang?: AllowedTranslation;
+  variables?: Placeholder & Partial<Variables>;
+  onLangChange?: (lang: AllowedTranslation, prev: AllowedTranslation) => void;
+  useHook?: HookFunction<AllowedTranslation>;
+  static?: boolean;
+  refreshOnChange?: boolean;
+}
+
 export function createTranslation<
   AllowedTranslation extends BCP,
   MainTranslation extends AllowedTranslation,
@@ -409,19 +423,8 @@ export function createTranslation<
     ) as any;
   };
 
-  interface Props {
-    children?: React.ReactNode;
-    onlyClient?: boolean;
-    initialLang?: AllowedTranslation;
-    variables?: Placeholder & Partial<Variables>;
-    onLangChange?: (lang: AllowedTranslation, prev: AllowedTranslation) => void;
-    useHook?: HookFunction<AllowedTranslation>;
-    static?: boolean;
-    refreshOnChange?: boolean;
-  }
-
   let useTranslation: THook;
-  let TranslationProvider: React.FC<Props>;
+  let TranslationProvider: React.FC<Props<AllowedTranslation, Variables>>;
 
   try {
     const TranslationContext = React.createContext<{

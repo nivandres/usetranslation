@@ -1,8 +1,6 @@
-# Use Translation 🌐👈🔥
+# Use Translation 🌐👈✅
 
 ## Translation Hook for Web Development
-
----
 
 ### Hello there 👋
 
@@ -297,19 +295,19 @@ import * as es from "@/public/locales/es.json"
 import { useRouter } from "next/router"
 import { createTranslation } from "use-translation"
 
-export const { useTranslation } = createTranslation({
+export const { useTranslation, TranslationProvider } = createTranslation({
     locales: { en, es },
     defaultLocale: en // you can define it with the full object.
     onNotTranslated: (queryString, queryLanguage, queryValues) => {
         // When translation not found, handle external translation API for example...
         return '😵'
     },
-    hook: (fix,langs,main) => { // You can modify the predetermined hook to use Next Router for example
+    useHook: ({ fix,langs,main }) => { // You can modify the predetermined hook to use Next Router for example
         const router = useRouter();
         return fix(
             router.locale, // string
             (l)=>router.push({ locale: l }), // function to mutate | Or set state action dispatch
-            router, // any value you want to return 
+            [router], // any value you want to return 
         )
     }
 },
@@ -318,6 +316,13 @@ export const { useTranslation } = createTranslation({
 ```
 
 That's all needed to start working with { t }.
+
+#### Provider
+
+```tsx
+<TranslationProvider>{children}</TranslationProvider>
+```
+
 
 #### Component usage example
 
@@ -378,6 +383,12 @@ export const { useTranslation } = createTranslation({
     defaultLocale: 'en'
 })
 ```
+
+> There are other much util function for getting lang and setting them in browser and server, this README is not totally up to day.
+
+> The creation function works for RSC and SSR and Vanilla, you can also configure Hooks on TranslationProvider and provide another inital lang
+
+> You can also provide in the creation function other params for get and set lagn statically.
 
 ## Features 🗽
 
