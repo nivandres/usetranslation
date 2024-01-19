@@ -26,6 +26,25 @@ export const reserveKeys = [
   "child",
   "get",
   "langs",
+  "lang",
+  "raw",
+  "f",
+  "t",
+  "l",
+  "p",
+  "parent",
+  "do",
+  "go",
+  "query",
+  "heaven",
+  "children",
+  "fix",
+  "variables",
+  "setVariables",
+  "values",
+  "setValues",
+  "from",
+  "apply",
 ] as const;
 
 export const invalidTranslationKeys = reserveKeys;
@@ -36,7 +55,7 @@ export type Size = "xs" | "sm" | "md" | "lg" | "xl";
 
 export type Base = string | number;
 export type Key = string | number;
-export type Placeholder = Record<string, Base>;
+export type Placeholder = Record<string, Base | null | undefined>;
 
 export type Node =
   | Base

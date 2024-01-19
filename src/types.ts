@@ -16,6 +16,7 @@ import {
   isArray,
   CleanArray,
   IsDefined,
+  PValue,
 } from "./utils";
 import { SetState } from "./hook";
 
@@ -79,7 +80,14 @@ export type Translator<
     N,
     L,
     V
-  >
+  >,
+  FC extends React.FC = <
+    D extends StringArray<isArray<SearchWays<N>>>,
+    E extends Placeholder
+  >(props: {
+    path?: D;
+    values?: Partial<V> & E;
+  }) => string & React.ReactNode
 > = {
   [C in P["children"]]: C extends keyof N
     ? N[C] extends Node
@@ -101,7 +109,12 @@ export type Translator<
         raw: string | undefined;
         heritage: H;
         child: string;
+        upperCase: string;
+        lowerCase: string;
+        C: FC;
+        FC: FC;
         set: U;
+        apply: Function;
       }
   : P["base"] extends string
   ? // both
@@ -117,6 +130,11 @@ export type Translator<
         go: S;
         path: S;
         find: S;
+        apply: Function;
+        upperCase: string;
+        lowerCase: string;
+        C: FC;
+        FC: FC;
         do: B;
         details: {
           base: P["base"];
@@ -124,7 +142,12 @@ export type Translator<
           children: P["children"][];
           variables: V;
           values: V;
+          apply: Function;
           search: S;
+          upperCase: string;
+          lowerCase: string;
+          C: FC;
+          FC: FC;
           get: S;
           raw: string | undefined;
           go: S;
@@ -153,6 +176,8 @@ export type Translator<
       set: U;
       find: S;
       do: B;
+      C: FC;
+      FC: FC;
     });
 
 export type Translation<
@@ -175,9 +200,17 @@ export type Translation<
       K,
       Variables
     >;
+    T: Translator<
+      AllowedTranslation,
+      MainTranslation,
+      Keep<Tree>,
+      MainTranslation,
+      Variables
+    >;
     g: Translation<Tree, AllowedTranslation, MainTranslation, Variables>;
     time: TimeFunction<AllowedTranslation>;
     locales: LocaleList<AllowedTranslation>;
+    lang: AllowedTranslation;
     intl: typeof Intl;
     fix: <E extends Placeholder>(
       variables?: E & Partial<Variables>
@@ -190,23 +223,12 @@ export type Translation<
     >;
   };
 } & {
-  time: (
-    time?: Date | number | string,
-    format?: Size | Record<Size, Intl.DateTimeFormatOptions>,
-    preferredLocale?: AllowedTranslation
-  ) => string;
+  time: TimeFunction<AllowedTranslation>;
   intl: typeof Intl;
   langs: AllowedTranslation[];
   main: MainTranslation;
   locales: LocaleList<AllowedTranslation>;
-  // match: (
-  //   lang: AllowedTranslation | string
-  // ) => Translation<
-  //   Tree,
-  //   AllowedTranslation,
-  //   MainTranslation,
-  //   Variables
-  // >[AllowedTranslation];
+  lang: AllowedTranslation;
   t: Translator<
     AllowedTranslation,
     MainTranslation,
@@ -240,41 +262,19 @@ export type TranslationNode<
   M extends A = A
 > = Translator<A, M, N, A, V>;
 
-export type UseArr<
-  T extends any,
-  A extends string,
-  V extends Placeholder,
-> = CleanArray<[T, SetState<A>, SetState<Partial<V> & Placeholder>, any[]]>;
-
-export type GetArr<T extends any, A extends BCP> = CleanArray<
-  [T, TimeFunction<A>, typeof Intl]
->;
-
-export type UseHook<
+export type DoTranslation<
   A extends BCP,
+  O extends A,
   N extends Node,
   V extends Placeholder,
+  X extends any = object
 > = <
   D extends StringArray<isArray<SearchWays<N>>> | undefined,
   W extends FollowWay<N, SplitString<D extends string ? D : "">>,
   E extends Placeholder,
-  T extends Translation<IsDefined<D, W, N>, A, A, E & V>
+  T extends Translation<IsDefined<D, W, N>, A, O, E & V>
 >(
   path?: D,
-  variables?: Partial<V> & E
-) => UseArr<Translator<A, A, W, A, V & E>, A, E & V> &
-  T & {
-    setLang: SetState<A>;
-    setValue: SetState<Partial<E & V> & Placeholder>;
-    dependencies: any[];
-  };
-
-export type GetHook<A extends BCP, N extends Node, V extends Placeholder> = <
-  D extends StringArray<isArray<SearchWays<N>>> | undefined,
-  W extends FollowWay<N, SplitString<D extends string ? D : "">>,
-  E extends Placeholder,
-  T extends Translation<IsDefined<D, W, N>, A, A, E & V>
->(
-  path?: D,
-  variables?: Partial<V> & E
-) => GetArr<Translator<A, A, W, A, V & E>, A> & T;
+  variables?: Partial<V> & E,
+  preferredLocale?: A
+) => T & X;

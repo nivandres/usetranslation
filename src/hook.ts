@@ -1,7 +1,14 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import { BCP } from "./locales";
-import { match } from "@formatjs/intl-localematcher";
-import { IsDefined } from "./utils";
+import { IsDefined, PValue, getValue } from "./utils";
+import {
+  getLangFromPathname,
+  lightFix,
+  fixLang,
+  getLangFromNavigator,
+  match,
+} from "./match";
+import Cookie from "js-cookie";
 
 const lskey = `nivandres-use-translation[npm]/locale-language-selection`;
 
@@ -9,46 +16,19 @@ export type SetState<T extends unknown = unknown> = Dispatch<
   React.SetStateAction<T>
 >;
 
-export type FixFunction<
-  A extends BCP = unknown & BCP,
-  M extends A = A
-> = <
-  T extends string | [string|A,...(string | A)[]] | A | undefined,
-  S extends ((value: SetStateAction<A>) => any) | undefined,
-  P2 extends any | undefined,
-  W extends IsDefined<T, T extends A ? T & A : T extends any[] ? T[keyof T] & A : A ,M>
->(
-  input?: T,
-  hook?: (S | any[]) & P2,
-  toReturn?: any[],
-) => A & IsDefined<
-  T,
-  IsDefined<P2, W & { value: W; setValue?: S; dependencies?: any[] }, W>,
-  M
->;
+export type HookFunction<A extends BCP = unknown & BCP> = (detail: {
+  fix: (str: A | string) => A;
+  langs: A[];
+  main: A;
+  initial: A;
+}) =>
+  | string
+  | [string]
+  | [string, SetState<A>]
+  | [string, SetState<A> | undefined, any[]]
+  | { value: string; stateHandler?: SetState<A>; dependencies?: any[] };
 
-export type HookFunction<
-  At extends BCP = never,
-  Mt extends At = At
-> = <A extends At, M extends Mt>(
-  fix: FixFunction<A> & {
-    main: A;
-    langs: A[];
-    fix: FixFunction<A>;
-    stateHandler: SetState<A>
-    prev?: null | A;
-  },
-  langs: A[],
-  main: A,
-  prev?: null
-) =>
-  | At
-  | [At]
-  | [At, SetState<At>]
-  | [At, SetState<At>, any[]]
-  | { value: At; setValue?: SetState<At>; dependencies?: any[] };
-
-export function SetStaticState(l: string | SetState<string>) {
+export function setStaticLang(l: string | SetState<string>) {
   // @ts-ignore
   const lang = typeof l === "string" ? l : l(localStorage.getItem(lskey));
   try {
@@ -59,191 +39,143 @@ export function SetStaticState(l: string | SetState<string>) {
   }
 }
 
-export const useLangHook: HookFunction = ({ main, langs, fix }) => {
-  const [lang, setLang] = useState(main);
+export function getStaticLang() {
+  try {
+    // @ts-ignore
+    return localStorage.getItem(lskey) || null;
+  } catch (err) {
+    return null;
+  }
+}
 
-  useEffect(() => {
-    let chosen = "";
+export function tryToRefresh(o?: boolean) {
+  if (!o) return;
+  try {
+    // @ts-ignore
+    location.reload();
+  } catch (err) {
+    return err;
+  }
+}
+
+export const useLangHook: HookFunction = ({
+  fix,
+  langs,
+  main,
+  initial: prev,
+}) => {
+  const [lang, setLang] = React.useState(prev || main);
+
+  React.useEffect(() => {
+    let chosen: any = lightFix(prev, langs, main);
     try {
-      // @ts-ignore
-      const pathname = location.pathname.split("/");
-      langs.map((l) => {
+      if (chosen.fallback) {
         // @ts-ignore
-        chosen = pathname.includes(l) ? l : "";
-      });
-
-      if (!chosen) {
-        // @ts-ignore
-        const l = String(localeStorage.getItem(lskey));
-        chosen = pathname.includes(l) ? l : "";
+        chosen = getLangFromPathname(location.pathname, langs, main);
       }
 
-      if (!chosen) {
-        // @ts-ignore
-        document.cookie.split(";").forEach((c) => {
-          if (c.includes("transl") || c.includes("local")) {
-            chosen = match(
-              (c.split("=")[1] || (main as string)).match(
-                /([a-z]{2}|[a-zA-Z]{2}[-_][a-zA-Z]{2}|[a-z]{2}(|[-_ ])[A-Z][a-zA-Z])/gm
-              ) || [],
-              langs,
-              main
-            );
-          }
-        });
+      if (chosen.fallback) {
+        chosen = fixLang(Cookie.get("lang"));
       }
 
-      if (!chosen) {
+      if (chosen.fallback) {
         // @ts-ignore
-        const n = window.navigator;
+        chosen = fixLang(location.search || "", langs, main);
+      }
+
+      if (chosen.fallback) {
         // @ts-ignore
-        chosen = langs.includes(n.language) ? n.language : "";
-        // @ts-ignore
-        chosen = match(n.languages as string, langs, main);
+        chosen = lightFix(String(localStorage.getItem(lskey)), langs, main);
+      }
+
+      if (chosen.fallback) {
+        chosen = fixLang(
+          // @ts-ignore
+          (document.cookie || "")
+            .split(";")
+            .filter((c: string) => c.match(/(lang|trans|local)/gi))
+            .join(""),
+          langs as any,
+          main
+        );
+      }
+
+      if (chosen.fallback) {
+        chosen = getLangFromNavigator(langs as any, main);
       }
     } catch (e) {
-      chosen = main;
+      chosen = main as any;
     }
     setLang(fix(chosen));
-  }, []);
+  }, [fix, langs, main, prev]);
 
   return [lang, setLang];
 };
-// export function createTranslationHook<
-//   Tree extends Node,
-//   AllowedTranslation extends BCP,
-//   MainTranslation extends AllowedTranslation,
-//   Variables extends Placeholder,
-//   V extends Placeholder
-// >(
-//   translation: Translation<
-//     Tree,
-//     AllowedTranslation,
-//     MainTranslation,
-//     Variables
-//   >,
-//   configuration?: HookConfiguration<
-//     AllowedTranslation,
-//     MainTranslation,
-//     Variables,
-//     V
-//   >
-// ): TranslationHook<Tree, AllowedTranslation, MainTranslation, Variables, V> {
 
-//   const useTranslation = createUseTranslation(translation, configuration)
-//   const getTranslation = createGetTranslation(translation, configuration)
+export function resolveLangHook(
+  hook: HookFunction,
+  langs: BCP[],
+  ref: BCP,
+  prev?: BCP
+) {
+  let h = [ref, setStaticLang, [{}]];
+  const u =
+    (hook({
+      fix: (s: string) => fixLang(s, langs, ref) as any,
+      langs: langs as any,
+      main: ref as any,
+      initial: prev as any,
+    }) as any) || ref;
+  if (typeof u === "string") {
+    h[0] = u as any;
+  } else if (typeof u === "object") {
+    h[0] = u.value || u[0] || h[0];
+    h[1] = u.stateHandler || u[1] || h[1];
+    h[2] = u.dependencies || u.hook || u[2] || u[1] || h[2];
+  }
+  return h as any;
+}
 
-//   const arr = [useTranslation, getTranslation];
+export function restoreLocalStorageLang() {
+  try {
+    localStorage.removeItem(lskey);
+  } catch (err) {
+    return err;
+  }
+}
 
-//   // @ts-ignore
-//   return Object.assign(arr, {
-//     useTranslation,
-//     getTranslation,
-//     rsc: Object.assign(getTranslation, {
-//       useTranslation: getTranslation,
-//     }),
-//     t: translation[translation.main]
-//   }) as any;
-// }
+export function setLocalStorageLang(lang: BCP) {
+  try {
+    localStorage.setItem(lskey, lang);
+  } catch (err) {
+    return err;
+  }
+}
 
-// function createGetTranslation(
-//   translation: any,
-//   configuration?: any
-// ) {
-//   return (
-//     variables?: Placeholder
-//   ) => {
+export function setCookieLang(lang: BCP, expires: number = 17) {
+  try {
+    Cookie.set("lang", lang, { expires });
+  } catch (err) {
+    return err;
+  }
+}
 
-//     const values: Placeholder = {
-//       ...(configuration?.variables || {}),
-//       ...(variables || {}),
-//     } as any;
-//     const lang: string = configuration?.default || translation.main;
+export function setPathnameLang(lang: BCP) {
+  try {
+  } catch (err) {
+    return err;
+  }
+}
 
-//     const t = translation.use(values);
-
-//     const arr = [t[lang], t[lang].time, Intl];
-
-//     // @ts-ignore
-//     let d = Object.assign(arr as CleanArray<typeof arr>, {
-//       ...t,
-//       t: t[lang],
-//       time: t[lang].time,
-//       intl: Intl,
-//     });
-
-//     let l = {} as any;
-
-//     translation.langs.forEach((lang: string) => {
-//       l[lang] = Object.assign(t[lang], {
-//         t: t[lang],
-//       });
-//     });
-
-//     return Object.assign(d, l)
-//   };
-// }
-
-// function createUseTranslation(
-//   translation: any,
-//   configuration?: any
-// ) {
-
-//   return <E extends Placeholder>(
-//     variables?: Placeholder
-//   ) => {
-//     const hook = configuration?.static
-//       ? undefined
-//       : configuration?.hook || useLangHook;
-//     const main = (configuration?.default ||
-//       translation.main);
-
-//     let lang: string = main;
-//     let setLang: Dispatch<React.SetStateAction<string>> = (v) =>
-//       (lang = main);
-
-//     const [values, setValues] = useState<
-//      Placeholder
-//     >({
-//       ...(configuration?.variables || {}),
-//       ...(variables || {}),
-//     } as any);
-
-//     if (hook != undefined) {
-// @ts-ignore
-//       const h = hook(translation.langs, main);
-//       // @ts-ignore
-//       lang = (h?.value || h?.[0] || h || lang) as AllowedTranslation;
-//       // @ts-ignore
-//       setLang = (h?.setValue || h?.[1] || setLang) as any;
-//     } else {
-//       [lang, setLang] = useState(
-//         configuration?.default || translation.main
-//       );
-//     }
-
-//     const t = translation.use(values);
-
-//     const arr = [t[lang], setLang, setValues];
-
-//     // @ts-ignore
-//     let d = Object.assign(arr, {
-//       ...t,
-//       t: t[lang],
-//       time: t[lang].time,
-//       setLang,
-//       setVariables: setValues,
-//     });
-
-//     let l = {} as any;
-
-//     translation.langs.forEach((lang: string) => {
-//       l[lang] = Object.assign(t[lang], {
-//         t: t[lang],
-//         setLang,
-//       });
-//     });
-
-//     return Object.assign(d, l) as any
-//   };
-// }
+export function setSearchParamLang(lang: BCP) {
+  try {
+    // @ts-ignore
+    const url = new URL(location.href);
+    // @ts-ignore
+    url.searchParams.set("lang", lang);
+    // @ts-ignore
+    location.replace(url);
+  } catch (err) {
+    return err;
+  }
+}

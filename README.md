@@ -175,7 +175,7 @@ import { createTranslation } from "use-translation"
 
 const createdTranslation = createTranslation({
     locales: { en, es }, // It will be notify an Error in case of any difference between translation structure 
-    defaultLocale: "en",
+    mainLocale: "en",
     // other settings like default variables, replacement placeholder strings, states, etc...
 })
 

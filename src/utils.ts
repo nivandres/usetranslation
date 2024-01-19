@@ -79,3 +79,16 @@ export type IsDefined<
   Def extends any = true,
   Undef extends any = false
 > = undefined extends T ? Undef : Def;
+
+export type Value<T extends any = any, O extends any[] = never[]> =
+  | T
+  | ((v: T, ...p: O) => T);
+export type UValue<T extends any = any, O extends any = never> = Value<T, [O]>;
+export type PValue<T extends any = any> = Value<T, [T]>;
+
+export function getValue<T extends any, O extends any[]>(
+  v: Value<T, O>,
+  ...p: O
+): T {
+  return typeof v === "function" ? (v as Function)(...p) : v;
+}

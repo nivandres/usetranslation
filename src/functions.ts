@@ -1,6 +1,6 @@
 import { BCP } from "./locales";
 import { Size } from "./format";
-import { useEffect, useState } from "react";
+import React from "react";
 
 export function createTimeFunction<A extends BCP>(
   lang: A,
@@ -76,22 +76,25 @@ export function createTimeFunction<A extends BCP>(
     }
   };
 
+  const n = (
+    format: Size | Intl.DateTimeFormatOptions = "md",
+    preferredLocale: A = lang
+  ) => {
+    return t(Date.now(), format, preferredLocale);
+  };
+
   return Object.assign(t, {
-    use: (
-      format: Size | Intl.DateTimeFormatOptions = "md",
-      preferredLocale: A = lang
-    ) => {
-      return t(Date.now(), format, preferredLocale)
-    },
+    use: n,
+    now: n,
     useNow: (
       interval: number | undefined = undefined,
       format: Size | Intl.DateTimeFormatOptions = "md",
       preferredLocale: A = lang
     ) => {
-      const [time, setTime] = useState(
+      const [time, setTime] = React.useState(
         defaultCurrentTime || new Date(1704999999999)
       );
-      useEffect(() => {
+      React.useEffect(() => {
         let loop: NodeJS.Timeout;
         if (interval) {
           loop = setInterval(() => {
