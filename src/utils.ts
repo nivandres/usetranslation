@@ -88,7 +88,7 @@ export type PValue<T extends any = any> = Value<T, [T]>;
 
 export function getValue<T extends any, O extends any[]>(
   v: Value<T, O>,
-  ...p: O
+  ...p: O | any[]
 ): T {
   return typeof v === "function" ? (v as Function)(...p) : v;
 }

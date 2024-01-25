@@ -22,9 +22,9 @@ import {
   tryToRefresh,
 } from "./hook";
 import { injectVariables, PValue, getValue, CleanArray } from "./utils";
-import { fixLang, lightFix } from "./match";
-
-type ENV = "client" | "server" | "both";
+import { fixLang, lightFix, updatePathname } from "./match";
+import { MiddlewareConfig, createMiddleware } from "./next";
+import Cookies from "js-cookie";
 
 function s(p: string[], t: any) {
   const k = p.shift();
@@ -37,18 +37,24 @@ function s(p: string[], t: any) {
   }
 }
 
+export type NextServerCookies = () => {
+  get: (name: string) => { value: string; name: string } | undefined;
+};
+
 interface Props<
   AllowedTranslation extends BCP = BCP,
   Variables extends Placeholder = Placeholder
 > {
   children?: React.ReactNode;
   onlyClient?: boolean;
-  initialLang?: AllowedTranslation;
+  initialLang?: string | AllowedTranslation | null;
   variables?: Placeholder & Partial<Variables>;
   onLangChange?: (lang: AllowedTranslation, prev: AllowedTranslation) => void;
   useHook?: HookFunction<AllowedTranslation>;
   static?: boolean;
   refreshOnChange?: boolean;
+  dontRefreshCookies?: boolean;
+  refreshPathname?: boolean;
 }
 
 export function createTranslation<
@@ -72,6 +78,12 @@ export function createTranslation<
     getStaticLang: getL,
     setStaticLang: setL,
     refreshOnChange,
+    middlewareRootPath,
+    nextCookies,
+    middlewareConfig,
+    middlewareCheckCookie,
+    refreshPathname,
+    debug,
   }: {
     locales: {
       [translation in AllowedTranslation]: Keep<Tree>;
@@ -85,17 +97,22 @@ export function createTranslation<
     defaultTime?: Date;
     variables?: Variables;
     replacement?: Replacement;
+    refreshPathname?: boolean;
     refreshOnChange?: boolean;
+    nextCookies?: NextServerCookies;
     apply?: Apply;
     getStaticLang?: (details: {
       fix: (str?: string | AllowedTranslation) => AllowedTranslation;
       langs: AllowedTranslation[];
       main: AllowedTranslation;
       initial: AllowedTranslation;
-    }) => AllowedTranslation;
+    }) => AllowedTranslation | string;
     setStaticLang?: (lang: AllowedTranslation, refresh?: boolean) => void;
     useHook?: HookFunction<AllowedTranslation>;
+    middlewareConfig?: MiddlewareConfig<AllowedTranslation, MainTranslation>;
     timeFormatOptions?: Record<Size, Intl.DateTimeFormatOptions>;
+    middlewareCheckCookie?: boolean;
+    middlewareRootPath?: "optional" | "force" | boolean;
     onFail?: <R extends boolean>(
       e: unknown,
       required: R
@@ -249,6 +266,8 @@ export function createTranslation<
       lowerCase: base?.toLowerCase(),
       C,
       FC: C,
+      fc: C,
+      react: { C, FC: C },
       set: use,
       go: search,
       lang: heritage.lang,
@@ -334,18 +353,21 @@ export function createTranslation<
 
   const setLang_ = (
     value: PValue<AllowedTranslation>,
-    refresh: boolean = true
+    refresh: boolean | 1 = true
   ) => {
     const v = lightFix(
       getValue(value, (getStaticLang() || ref) as any) || getStaticLang()
     );
     try {
       setStaticLang(v);
-      setL?.(v as any, refresh);
+      setL?.(v as any, refresh as any);
+      if (refreshPathname || refresh == 1) {
+        updatePathname(v);
+      }
     } catch (err) {
       onFail?.(err, false);
     }
-    tryToRefresh(refresh);
+    tryToRefresh(refresh === true);
   };
 
   const getLang_: () => AllowedTranslation = () =>
@@ -391,7 +413,7 @@ export function createTranslation<
       [
         AllowedTranslation,
         SetState<AllowedTranslation>,
-        SetState<Variables & Placeholder>,
+        SetState<Partial<Variables> & Placeholder>,
         any[]
       ]
     > & {
@@ -402,8 +424,16 @@ export function createTranslation<
     }
   >;
 
-  const getTranslation: THook = (path, defaultVariables, preferredLang) => {
-    const lang: AllowedTranslation = preferredLang || getLang_();
+  // @ts-ignore
+  const getTranslation: Promise<THook> & THook = (
+    path,
+    defaultVariables,
+    preferredLang
+  ) => {
+    const lang: AllowedTranslation =
+      preferredLang || nextCookies
+        ? (nextCookies?.().get("lang")?.value as any)
+        : getLang_();
     const setLang = setLang_;
     const setValues = () => {};
     const dependencies = [{}];
@@ -411,19 +441,41 @@ export function createTranslation<
       ...(variables || {}),
       ...(defaultVariables || {}),
     };
-    return Object.assign(
-      [lang, setLang, setValues, dependencies],
-      doTranslation(path, values, lang),
-      {
-        lang,
-        setLang,
-        setValues,
-        dependencies,
+
+    const o = {
+      lang,
+      setLang,
+      setValues,
+      dependencies,
+    };
+
+    const a = [lang, setLang, setValues, dependencies];
+
+    const pro = Object.assign(a, doTranslation(path, values, lang), o);
+
+    const p = new Promise(async (resolve, reject) => {
+      try {
+        const { cookies } = await import("next/headers");
+        resolve(
+          Object.assign(
+            a,
+            doTranslation(
+              path,
+              values,
+              lightFix(cookies().get("lang")?.value, langs, ref)
+            ),
+            o
+          )
+        );
+      } catch (err) {
+        reject(pro);
       }
-    ) as any;
+    });
+
+    return Object.assign(p, pro) as any;
   };
 
-  let useTranslation: THook;
+  let useTranslation: Promise<THook> & THook;
   let TranslationProvider: React.FC<Props<AllowedTranslation, Variables>>;
 
   try {
@@ -450,6 +502,8 @@ export function createTranslation<
       useHook: clientHook,
       static: static_hook,
       refreshOnChange: refresh,
+      dontRefreshCookies: rcookies,
+      refreshPathname: refreshP,
     }) {
       const staticLang: AllowedTranslation = useMemo(() => {
         let r: any;
@@ -488,12 +542,18 @@ export function createTranslation<
             lang: () => lang,
             setLang: (
               va: PValue<AllowedTranslation>,
-              r: boolean = (refresh ?? refreshOnChange) || false
+              r: boolean = (refresh ?? refreshOnChange ?? refreshP) || false
             ) => {
               const v = getValue(va, lang);
+              if (v == lang) {
+                return;
+              }
               setLang(v);
+              if (!rcookies) {
+                Cookies.set("lang", v);
+              }
               onLangChange?.(v, lang);
-              setLang_(v, r);
+              setLang_(v, r && (refreshP || refreshPathname) ? 1 : r);
             },
             setValues: setValues as any,
             dependencies,
@@ -504,18 +564,25 @@ export function createTranslation<
       );
     };
 
+    // @ts-ignore
     useTranslation = (path, defaultVariables, preferredLang) => {
       const { lang, setValues, setLang, t, dependencies } =
         useContext(TranslationContext);
 
       const tr = t.search(path, defaultVariables)[preferredLang || "t"];
 
-      return Object.assign([lang, setLang, setValues, dependencies], tr, {
+      const pro = Object.assign([lang, setLang, setValues, dependencies], tr, {
         lang,
         setLang,
         setValues,
         dependencies,
-      }) as any;
+      });
+
+      const p = new Promise((resolve) => {
+        resolve(pro);
+      });
+
+      return Object.assign(p, pro) as any;
     };
   } catch (err) {
     // @ts-ignore
@@ -525,6 +592,14 @@ export function createTranslation<
     // @ts-ignore
     useTranslation = getTranslation;
   }
+
+  const next = createMiddleware({
+    langs,
+    main: ref,
+    rootPath: middlewareRootPath || false,
+    checkCookie: middlewareCheckCookie || false,
+    ...middlewareConfig,
+  });
 
   return {
     t,
@@ -543,8 +618,13 @@ export function createTranslation<
     setLang: setLang_,
     getLang: getLang_,
     TranslationProvider,
-    T: t,
+    react: {
+      T: t,
+      FC: t,
+    },
     fix,
+    next,
+    ...next,
   };
 }
 

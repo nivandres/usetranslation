@@ -3,3 +3,4 @@ package-lock.json
 /out
 /test
 bun.lockb
+/dist

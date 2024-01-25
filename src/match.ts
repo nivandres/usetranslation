@@ -2,6 +2,7 @@ import { match as m } from "@formatjs/intl-localematcher";
 import { BCP, BCPList } from "./locales";
 import Cookie from "js-cookie";
 import Negotiator from "negotiator";
+import { getStaticLang } from "./hook";
 
 export const match = <A extends BCP[]>(
   l: (string | A[number] | undefined | null)[],
@@ -15,7 +16,7 @@ export const match = <A extends BCP[]>(
       "ar-CO"
     );
     if (o === "ar-CO") return Object.assign(main, { fallback: true });
-    return o as any;
+    return lightFix(o) as any;
   } catch (err) {
     return Object.assign(main, { fallback: true });
   }
@@ -61,19 +62,25 @@ export function getLangFromHeaders<A extends BCP[]>(
 }
 
 export function getLangFromPathname<A extends BCP[]>(
-  pathname: string | `${"" | "/"}${A[number]}${`/${string}` | ""}` | A[number],
+  pathname:
+    | string
+    | `${"" | "/"}${A[number]}${`/${string}` | ""}`
+    | A[number] = "",
   langs: A = BCPList as A,
   main: A[number] = langs[0]
 ) {
-  return lightFix(
-    match(
+  try {
+    pathname ||= location.pathname;
+  } catch (err) {
+    pathname ||= "/";
+  }
+  return match(
+    [
       pathname
         .replaceAll("_", "-")
         .split("/")
-        .filter((a) => a),
-      langs,
-      main
-    ),
+        .filter((a) => a)[0],
+    ],
     langs,
     main
   );
@@ -129,4 +136,106 @@ export function getLangFromCookie<A extends BCP[]>(
   } catch (err) {
     return Object.assign(main, { fallback: true });
   }
+}
+
+export function getLangFromSearchParams<A extends BCP[]>(
+  langs: A = BCPList as A,
+  main: A[number] = langs[0]
+): A[number] {
+  try {
+    // @ts-ignore
+    const url = new URL(location.href);
+    // @ts-ignore
+    return fixLang(url.searchParams.get("lang"), langs, main);
+  } catch (err) {
+    return Object.assign(main, { fallback: true });
+  }
+}
+
+export function getLangFromDomain<A extends BCP[]>(
+  hostname: string,
+  langs: A = BCPList as A,
+  main: A[number] = langs[0]
+): A[number] {
+  try {
+    return match(hostname.split("."));
+  } catch (err) {
+    return Object.assign(main, { fallback: true });
+  }
+}
+
+export function getLangFromHref<A extends BCP[]>(
+  langs: A = BCPList as A,
+  main: A[number] = langs[0]
+): A[number] {
+  try {
+    return match(
+      [
+        // @ts-ignore
+        getLangFromDomain(location.hostname, langs, main),
+        // @ts-ignore
+        getLangFromPathname(location.pathname, langs, main),
+        getLangFromSearchParams(langs, main),
+      ],
+      langs,
+      main
+    );
+  } catch (err) {
+    return Object.assign(main, { fallback: true });
+  }
+}
+
+export const getLangFromLocalStorage = getStaticLang;
+
+export function getLangFromBrowser<A extends BCP[]>(
+  langs: A = BCPList as A,
+  main: A[number] = langs[0]
+): A[number] {
+  try {
+    return match(
+      [
+        getLangFromHref(langs, main),
+        getLangFromLocalStorage(),
+        getLangFromCookie(langs, main),
+        getLangFromNavigator(langs, main),
+      ],
+      langs,
+      main
+    );
+  } catch (err) {
+    return Object.assign(main, { fallback: true });
+  }
+}
+
+export function updatePathname(
+  lang: BCP,
+  pathname: string = "",
+  doNotRefresh?: boolean
+) {
+  const plang = getLangFromPathname(pathname) as string & {
+    fallback?: boolean;
+  };
+  let newPath = "";
+  if (plang.fallback) {
+    newPath = "/" + lightFix(lang) + pathname;
+  } else {
+    try {
+      // @ts-ignore
+      pathname ||= location.pathname;
+    } catch (err) {
+      pathname ||= "/";
+    }
+    newPath = lightFix(lang) + pathname
+    .split("/")
+    .filter((a) => a != plang.valueOf())
+    .join("/");
+  }
+  if (!doNotRefresh) {
+    try {
+      // @ts-ignore
+      location.pathname = newPath;
+    } catch (err) {
+    }
+  }
+  return newPath;
 }

@@ -17,7 +17,7 @@ export type SetState<T extends unknown = unknown> = Dispatch<
 >;
 
 export type HookFunction<A extends BCP = unknown & BCP> = (detail: {
-  fix: (str: A | string) => A;
+  fix: (str: A | string | undefined | null) => A;
   langs: A[];
   main: A;
   initial: A;
@@ -69,6 +69,7 @@ export const useLangHook: HookFunction = ({
   React.useEffect(() => {
     let chosen: any = lightFix(prev, langs, main);
     try {
+
       if (chosen.fallback) {
         // @ts-ignore
         chosen = getLangFromPathname(location.pathname, langs, main);
@@ -107,7 +108,7 @@ export const useLangHook: HookFunction = ({
       chosen = main as any;
     }
     setLang(fix(chosen));
-  }, [fix, langs, main, prev]);
+  }, []);
 
   return [lang, setLang];
 };
@@ -121,7 +122,7 @@ export function resolveLangHook(
   let h = [ref, setStaticLang, [{}]];
   const u =
     (hook({
-      fix: (s: string) => fixLang(s, langs, ref) as any,
+      fix: (s) => fixLang(s, langs, ref) as any,
       langs: langs as any,
       main: ref as any,
       initial: prev as any,
@@ -138,6 +139,7 @@ export function resolveLangHook(
 
 export function restoreLocalStorageLang() {
   try {
+    // @ts-ignore
     localStorage.removeItem(lskey);
   } catch (err) {
     return err;
@@ -146,6 +148,7 @@ export function restoreLocalStorageLang() {
 
 export function setLocalStorageLang(lang: BCP) {
   try {
+    // @ts-ignore
     localStorage.setItem(lskey, lang);
   } catch (err) {
     return err;

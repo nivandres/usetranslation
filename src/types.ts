@@ -133,8 +133,11 @@ export type Translator<
         apply: Function;
         upperCase: string;
         lowerCase: string;
-        C: FC;
-        FC: FC;
+        react: {
+          C: FC;
+          FC: FC;
+        };
+        fc: FC;
         do: B;
         details: {
           base: P["base"];
@@ -146,8 +149,11 @@ export type Translator<
           search: S;
           upperCase: string;
           lowerCase: string;
-          C: FC;
-          FC: FC;
+          react: {
+            C: FC;
+            FC: FC;
+          };
+          fc: FC;
           get: S;
           raw: string | undefined;
           go: S;
@@ -176,8 +182,11 @@ export type Translator<
       set: U;
       find: S;
       do: B;
-      C: FC;
-      FC: FC;
+      react: {
+        C: FC;
+        FC: FC;
+      };
+      fc: FC;
     });
 
 export type Translation<

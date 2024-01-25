@@ -26,3 +26,4 @@ export type {
   Replacement,
 } from "./format";
 export * from "./match";
+export * from "./next"
